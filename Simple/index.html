@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TrainingsPlanAssistant</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>TrainingsPlanAssistant</h1>
+  <p id="message"></p>
+
+  <!-- Anmelden / Registrieren -->
+  <section id="auth-view">
+    <h2>Anmelden</h2>
+    <form id="login-form">
+      <input id="login-email" type="email" placeholder="E-Mail" required>
+      <input id="login-password" type="password" placeholder="Passwort" required>
+      <button>Anmelden</button>
+    </form>
+    <h2>Registrieren</h2>
+    <form id="register-form">
+      <input id="register-username" placeholder="Benutzername" required>
+      <input id="register-email" type="email" placeholder="E-Mail" required>
+      <input id="register-password" type="password" placeholder="Passwort" required>
+      <button>Registrieren</button>
+    </form>
+  </section>
+
+  <!-- Pläne -->
+  <section id="plans-view" hidden>
+    <button id="logout-button">Abmelden</button>
+    <h2>Neuer Plan</h2>
+    <form id="plan-form">
+      <input id="plan-name" placeholder="Name" required>
+      <input id="plan-description" placeholder="Beschreibung (optional)">
+      <button>Plan anlegen</button>
+    </form>
+    <h2>Meine Pläne</h2>
+    <ul id="plan-list"></ul>
+  </section>
+
+  <!-- Ein Plan mit Übungen -->
+  <section id="plan-view" hidden>
+    <button id="back-button">Zurück</button>
+    <h2 id="plan-title"></h2>
+    <p id="plan-description-text"></p>
+    <h3>Übung hinzufügen</h3>
+    <p>Das Backend hat noch keine Übungssuche. Bitte die ExerciseDB-ID direkt eingeben.</p>
+    <form id="exercise-form">
+      <input id="exercise-id" placeholder="externalId (ExerciseDB)" required>
+      <input id="exercise-note" placeholder="Notiz (optional)">
+      <button>Hinzufügen</button>
+    </form>
+    <h3>In dieser Sitzung hinzugefügt</h3>
+    <ul id="exercise-list"></ul>
+  </section>
+
+  <footer>Daten: ExerciseDB</footer>
+  <script src="app.js"></script>
+</body>
+</html>
