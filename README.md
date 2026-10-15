@@ -11,7 +11,7 @@ npm start
 ```
 
 Danach ist die SPA unter `http://localhost:4200` verfügbar. Das Backend wird
-unter `http://localhost:8080/api/v1` erwartet.
+unter `https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1` erwartet.
 
 ## Zwei Prüfungs-Touchpoints
 
@@ -20,7 +20,8 @@ mit Login, Registrierung, Dashboard, Trainingsplänen und Planübungen.
 
 Zusätzlich bleibt unter [`Main`](./Main) ein eigenständiger MPA-Touchpoint
 erhalten. Die Seiten laden bei Navigation vollständig neu und verwenden
-`Funktions.js` für die Backend-Kommunikation:
+`Funktions.js` für Authentifizierung sowie `MpaExercises.js` für die
+Übungsbibliothek:
 
 - `LogIn.html` und `Register.html` bilden die Authentifizierungsseiten.
 - `Homepage.html` bildet den MPA-Touchpoint für die Übungsbibliothek.
@@ -32,5 +33,10 @@ Lokal kann der MPA-Touchpoint mit einem statischen Server unter
 `http://localhost:5500/Main/LogIn.html` gestartet werden. Die SPA läuft
 parallel unter `http://localhost:4200/auth`.
 
-Für ein Deployment können beide Touchpoints unter derselben Domain ausgeliefert
-werden. Die Angular-Routen müssen dabei auf `index.html` zurückfallen.
+Öffentliche Frontend-Adresse des bestehenden Deployments:
+
+`https://trainingsplan-frontend-be8f5157e428.herokuapp.com/`
+
+Für ein Angular-Deployment müssen die Angular-Routen auf `index.html`
+zurückfallen. Der aktuelle Angular-Produktionsbuild entsteht mit
+`npm run build` unter `angular/dist/capsule-gym-frontend`.
