@@ -23,9 +23,10 @@ erhalten. Die Seiten laden bei Navigation vollständig neu und verwenden
 `Funktions.js` für die Backend-Kommunikation:
 
 - `LogIn.html` und `Register.html` bilden die Authentifizierungsseiten.
-- `Homepage.html` bildet den MPA-Dashboard-Touchpoint.
-- Trainingspläne und ExerciseDB-Übungen werden über das Backend geladen.
-- Die MPA kann Pläne anlegen/löschen und Übungen suchen.
+- `Homepage.html` bildet den MPA-Touchpoint für die Übungsbibliothek.
+- `ExerciseDetails.html` ist eine zweite MPA-Seite für die Detailansicht.
+- Beide Seiten laden Daten über `MpaExercises.js` asynchron aus dem Backend.
+- Die Navigation zwischen Bibliothek und Detailansicht lädt jeweils ein neues HTML-Dokument.
 
 Lokal kann der MPA-Touchpoint mit einem statischen Server unter
 `http://localhost:5500/Main/LogIn.html` gestartet werden. Die SPA läuft

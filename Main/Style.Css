@@ -381,6 +381,12 @@ h2, h3 { font-family: "Saiyan Sans", "Segoe UI", sans-serif; font-weight: 400; t
 .exercise-item strong { display: block; font-size: 13px; }
 .exercise-item span { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; }
 .exercise-item small { display: block; margin-top: 6px; color: var(--muted); font-size: 10px; }
+.exercise-item .gold-button { display: inline-block; width: auto; min-height: 34px; margin-top: 12px; padding: 9px 11px; color: #1a1a1a; font-size: 11px; text-decoration: none; }
+.exercise-detail { max-width: 760px; padding: 26px; border: 1px solid var(--line); background: #1b1b1b; }
+.exercise-detail img { display: block; width: min(100%, 420px); max-height: 360px; margin-bottom: 24px; object-fit: contain; background: #141414; }
+.exercise-detail h1 { margin-bottom: 18px; }
+.exercise-detail h2 { margin-top: 28px; font-size: 18px; }
+.exercise-detail li { margin: 9px 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .empty-state { padding: 28px; border: 1px dashed var(--line); color: var(--muted); font-size: 13px; text-align: center; }
 
 .profile-layout { display: grid; grid-template-columns: minmax(200px, .65fr) minmax(0, 1fr); gap: 32px; max-width: 760px; }

@@ -1,155 +1,34 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="de">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111111">
-  <title>Training | Capsule Gym</title>
+  <title>Übungsbibliothek | Capsule Gym</title>
   <link rel="stylesheet" href="Style.Css">
 </head>
 <body>
   <header class="app-topbar">
-    <button class="icon-button" id="menu-toggle" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="side-menu">
-      <span></span><span></span><span></span>
-    </button>
-    <a class="app-brand" href="Homepage.html">Capsule Gym <small>TRAINING</small></a>
+    <a class="app-brand" href="Homepage.html">Capsule Gym <small>MPA</small></a>
     <div class="account-block">
-      <span class="user-avatar" id="user-avatar" aria-hidden="true"></span>
       <span id="current-user"></span>
-      <button class="logout-button" id="logout-button" type="button">Abmelden</button>
+      <a class="logout-button" href="LogIn.html">Abmelden</a>
     </div>
   </header>
-
-  <div class="menu-backdrop" id="menu-backdrop" hidden></div>
-  <aside class="side-menu" id="side-menu" aria-label="Hauptmenü" hidden>
-    <div class="menu-head">
-      <strong>Capsule Gym</strong>
-      <button class="menu-close" id="menu-close" type="button" aria-label="Menü schließen">×</button>
-    </div>
-    <nav aria-label="Trainingsbereiche">
-      <button class="nav-item" type="button" data-view-target="overview" aria-current="page"><span class="nav-index">01</span>Übersicht</button>
-      <button class="nav-item" type="button" data-view-target="plans"><span class="nav-index">02</span>Trainingspläne</button>
-      <button class="nav-item" type="button" data-view-target="create"><span class="nav-index">03</span>Training erstellen</button>
-      <button class="nav-item" type="button" data-view-target="exercises"><span class="nav-index">04</span>Übungen</button>
-      <button class="nav-item" type="button" data-view-target="profile"><span class="nav-index">05</span>Mein Profil</button>
-    </nav>
-    <p class="menu-foot">Dein Training. Dein Fortschritt.</p>
-  </aside>
-
   <main class="app-main">
-    <section class="app-view" id="view-overview" aria-labelledby="overview-title">
-      <div class="page-heading">
-        <p class="eyebrow">Dein Trainingsbereich</p>
-        <h1 id="overview-title">Willkommen, <span id="greeting-name">Athlet</span></h1>
-        <p>Mach heute den nächsten Schritt.</p>
-      </div>
-
-      <div class="dashboard-stats" aria-label="Trainingsübersicht">
-        <div class="stat"><strong id="stat-plans">0</strong><span>Deine Trainingspläne</span></div>
-        <div class="stat"><strong id="stat-exercises">0</strong><span>Übungen verfügbar</span></div>
-      </div>
-
-      <div class="dashboard-grid">
-        <section class="content-section" aria-labelledby="featured-title">
-          <div class="section-heading"><h2 id="featured-title">Dein nächstes Training</h2></div>
-          <div class="training-feature">
-            <p class="feature-kicker">Heute ist ein guter Tag</p>
-            <h3>Dein Plan wartet auf dich.</h3>
-            <p>Wähle einen bestehenden Trainingsplan oder stelle dir eine neue Einheit zusammen.</p>
-            <button class="gold-button" type="button" data-open-view="plans">Trainingspläne ansehen</button>
-          </div>
-        </section>
-
-      </div>
+    <section class="page-heading">
+      <p class="eyebrow">MPA-Touchpoint</p>
+      <h1>Übungsbibliothek</h1>
+      <p>Suche eine Übung. Die Detailansicht wird als eigene HTML-Seite geladen.</p>
     </section>
-
-    <section class="app-view" id="view-plans" aria-labelledby="plans-title" hidden>
-      <div class="page-heading">
-        <p class="eyebrow">Struktur für dein Training</p>
-        <h1 id="plans-title">Trainingspläne</h1>
-        <p>Behalte den Überblick oder protokolliere eine absolvierte Einheit.</p>
-      </div>
-      <div class="plan-grid" id="plan-grid"></div>
-    </section>
-
-    <section class="app-view" id="view-plan-detail" aria-labelledby="plan-detail-title" hidden>
-      <div class="page-heading">
-        <p class="eyebrow">Übungen im Trainingsplan</p>
-        <h1 id="plan-detail-title">Plan</h1>
-        <p id="plan-detail-description"></p>
-      </div>
-      <div class="plan-exercise-toolbar">
-        <button class="text-action" id="back-to-plans" type="button">← Zu den Trainingsplänen</button>
-        <button class="gold-button" id="open-exercise-library" type="button">Übung auswählen</button>
-      </div>
-      <div class="exercise-grid" id="plan-exercise-grid"></div>
-    </section>
-
-    <section class="app-view" id="view-create" aria-labelledby="create-title" hidden>
-      <div class="page-heading">
-        <p class="eyebrow">Deine Einheit, dein Aufbau</p>
-        <h1 id="create-title">Training erstellen</h1>
-        <p>Lege einen Trainingsplan an und ergänze die Übungen.</p>
-      </div>
-      <form class="form-layout" id="create-form">
-        <div class="field">
-          <label for="training-name">Name des Trainings</label>
-          <input id="training-name" name="name" type="text" placeholder="Zum Beispiel: Oberkörper A" required maxlength="60">
-        </div>
-        <div class="field">
-          <label for="training-focus">Trainingsschwerpunkt</label>
-          <select id="training-focus" name="focus" required>
-            <option value="Kraft">Kraft</option>
-            <option value="Ausdauer">Ausdauer</option>
-            <option value="Beweglichkeit">Beweglichkeit</option>
-            <option value="Ganzkörper">Ganzkörper</option>
-          </select>
-        </div>
-        <button type="submit">Trainingsplan speichern</button>
-        <p class="form-message" id="create-message" role="status" aria-live="polite"></p>
-      </form>
-    </section>
-
-    <section class="app-view" id="view-exercises" aria-labelledby="exercises-title" hidden>
-      <div class="page-heading">
-        <p class="eyebrow">Deine Trainingsbibliothek</p>
-        <h1 id="exercises-title">Übungen</h1>
-        <p>Finde Übungen nach Name oder Muskelgruppe.</p>
-      </div>
-      <div class="exercise-toolbar">
-        <h2>Alle Übungen</h2>
-        <div class="exercise-search"><input id="exercise-search" type="search" placeholder="Übung suchen …" aria-label="Übungen durchsuchen"></div>
-      </div>
-      <div class="exercise-grid" id="exercise-grid"></div>
-    </section>
-
-    <section class="app-view" id="view-profile" aria-labelledby="profile-title" hidden>
-      <div class="page-heading">
-        <p class="eyebrow">Deine persönlichen Angaben</p>
-        <h1 id="profile-title">Mein Profil</h1>
-        <p>Verwalte die Angaben für deinen Trainingsbereich.</p>
-      </div>
-      <div class="profile-layout">
-        <section class="profile-summary" aria-label="Profilübersicht">
-          <span class="user-avatar" id="profile-avatar" aria-hidden="true"></span>
-          <h2 id="profile-name">Athlet</h2>
-          <p id="profile-goal">Trainingsziel noch offen</p>
-        </section>
-        <form class="profile-form" id="profile-form">
-          <div class="field">
-            <label for="profile-display-name">Anzeigename</label>
-            <input id="profile-display-name" name="displayName" type="text" required maxlength="40" readonly>
-          </div>
-          <div class="field">
-            <label for="profile-training-goal">Trainingsziel</label>
-            <input id="profile-training-goal" name="goal" type="text" placeholder="Vom Backend derzeit nicht unterstützt" maxlength="80" readonly>
-          </div>
-          <p class="form-message" id="profile-message" role="status" aria-live="polite">Profil wird aus dem Backend geladen.</p>
-        </form>
-      </div>
-    </section>
+    <form class="exercise-toolbar" id="exercise-search-form">
+      <label class="exercise-search">Übung suchen
+        <input id="exercise-search" type="search" placeholder="z. B. bench press" autocomplete="off">
+      </label>
+      <button class="gold-button" type="submit">Suchen</button>
+    </form>
+    <p class="form-message" id="exercise-message" role="status" aria-live="polite"></p>
+    <div class="exercise-grid" id="exercise-grid"></div>
   </main>
-
-  <script src="Funktions.js"></script>
+  <script src="MpaExercises.js"></script>
 </body>
 </html>
