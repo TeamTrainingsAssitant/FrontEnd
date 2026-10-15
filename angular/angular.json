@@ -15,7 +15,13 @@
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": [],
+            "assets": [
+              {
+                "glob": "Saiyan-Sans.ttf",
+                "input": "../Main",
+                "output": "assets/fonts"
+              }
+            ],
             "styles": ["src/styles.css"],
             "outputPath": "dist/capsule-gym-frontend"
           }

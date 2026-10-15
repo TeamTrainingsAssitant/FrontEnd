@@ -1,6 +1,6 @@
 <header class="topbar">
   <button class="menu-button" type="button" (click)="menuOpen = !menuOpen">☰</button>
-  <strong>Capsule Gym <small>TRAINING</small></strong>
+  <strong class="brand">Capsule Gym <small>Training</small></strong>
   <div class="account">{{ user?.username }} <button class="link-button" type="button" (click)="logout()">Abmelden</button></div>
 </header>
 <aside class="side-menu" [class.open]="menuOpen">

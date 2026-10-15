@@ -1,6 +1,6 @@
 <main class="auth-page">
   <section class="auth-card">
-    <p class="eyebrow">CAPSULE GYM</p>
+    <p class="brand">Capsule Gym</p>
     <h1>{{ mode === 'login' ? 'Willkommen zurück' : 'Neues Benutzerkonto' }}</h1>
     <p class="muted">{{ mode === 'login' ? 'Melde dich an, um fortzufahren.' : 'Erstelle dein persönliches Konto.' }}</p>
     <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="login()">
