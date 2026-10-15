@@ -1,0 +1,6 @@
+{
+  "root": "Main/",
+  "routes": {
+    "/": "Homepage.html"
+  }
+}
