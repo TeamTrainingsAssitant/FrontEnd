@@ -124,7 +124,8 @@ input, select {
 }
 .exercise img { display: block; width: 100%; height: 170px; margin-bottom: 12px; object-fit: contain; background: var(--background); }
 .exercise h2 { margin: 0 0 8px; font-size: 16px; }
-.exercise p { color: #bbb; font-size: 12px; }
+.exercise p, .exercise-muscles { color: #999; font-size: 11px; line-height: 1.4; }
+.exercise-muscles { display: block; margin: 4px 0; }
 
 @media (max-width: 600px) {
   .auth-card { padding: 28px; }

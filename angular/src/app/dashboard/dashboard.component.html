@@ -101,19 +101,12 @@
       <article class="exercise" *ngFor="let exercise of exercises">
         <img [src]="exercise.gifUrl" [alt]="exercise.name" loading="lazy">
         <h2>{{ exercise.name }}</h2>
-        <p>{{ exercise.primaryMuscleGroups.join(' · ') }}</p>
-        <small>{{ exercise.secondaryMuscleGroups.join(' · ') }}</small>
-        <button type="button" (click)="showExerciseDetails(exercise)">Details anzeigen</button>
+        <p class="exercise-muscles">{{ exercise.primaryMuscleGroups.join(' · ') }}</p>
+        <small class="exercise-muscles">{{ exercise.secondaryMuscleGroups.join(' · ') }}</small>
         <button type="button" [disabled]="!plans.length" (click)="chooseExercise(exercise); selectView('plans')">Zu Plan hinzufügen</button>
       </article>
     </div>
     <p class="muted" *ngIf="!exercisesLoading && !exercises.length">Keine Übungen gefunden.</p>
-    <div class="feature" *ngIf="selectedExercise">
-      <h2>{{ selectedExercise.name }}</h2>
-      <p>{{ selectedExercise.bodyParts.join(' · ') }} · {{ selectedExercise.equipments.join(' · ') }}</p>
-      <ol><li *ngFor="let instruction of selectedExercise.instructions">{{ instruction }}</li></ol>
-      <button type="button" class="link-button" (click)="selectedExercise = null">Details schließen</button>
-    </div>
   </section>
   <section *ngIf="view === 'profile'">
     <p class="eyebrow">PERSÖNLICHE ANGABEN</p><h1>Mein Profil</h1>

@@ -28,12 +28,6 @@ export interface Exercise {
   equipments?: string[];
 }
 
-export interface ExerciseDetails extends Exercise {
-  bodyParts: string[];
-  equipments: string[];
-  instructions: string[];
-}
-
 export interface PlanExercise extends Exercise {
   id: number;
   position: number;
@@ -78,9 +72,6 @@ export class PlanService {
     params.set('offset', String(offset));
     params.set('limit', '20');
     return this.http.get<{ total: number; exercises: Exercise[] }>(`${this.rootApi}/exercisedb/exercises?${params}`);
-  }
-  getExercise(externalId: string): Observable<ExerciseDetails> {
-    return this.http.get<ExerciseDetails>(`${this.rootApi}/exercisedb/exercises/${encodeURIComponent(externalId)}`);
   }
   muscles(): Observable<string[]> {
     return this.http.get<string[]>(`${this.rootApi}/exercisedb/muscles`);

@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../auth.service';
-import { Exercise, ExerciseDetails, Plan, PlanExercise, PlanService } from '../plan.service';
+import { Exercise, Plan, PlanExercise, PlanService } from '../plan.service';
 
 type View = 'overview' | 'plans' | 'create' | 'exercises' | 'profile';
 
@@ -32,7 +32,6 @@ export class DashboardComponent {
   muscles: string[] = [];
   bodyParts: string[] = [];
   exercisesLoading = false;
-  selectedExercise: ExerciseDetails | null = null;
   selectedPlan: Plan | null = null;
   planExercises: PlanExercise[] = [];
   exerciseToAdd: Exercise | null = null;
@@ -236,13 +235,6 @@ export class DashboardComponent {
     this.plansApi.bodyParts().subscribe({
       next: (bodyParts) => this.bodyParts = bodyParts,
       error: (error: unknown) => this.error = this.apiMessage(error, 'Körperbereiche konnten nicht geladen werden.')
-    });
-  }
-
-  showExerciseDetails(exercise: Exercise): void {
-    this.plansApi.getExercise(exercise.externalId).subscribe({
-      next: (details) => this.selectedExercise = details,
-      error: (error: unknown) => this.error = this.apiMessage(error, 'Übungsdetails konnten nicht geladen werden.')
     });
   }
 
