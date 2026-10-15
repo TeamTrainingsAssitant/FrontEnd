@@ -1,0 +1,24 @@
+<main class="auth-page">
+  <section class="auth-card">
+    <p class="eyebrow">CAPSULE GYM</p>
+    <h1>{{ mode === 'login' ? 'Willkommen zurück' : 'Neues Benutzerkonto' }}</h1>
+    <p class="muted">{{ mode === 'login' ? 'Melde dich an, um fortzufahren.' : 'Erstelle dein persönliches Konto.' }}</p>
+    <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="login()">
+      <label>E-Mail <input type="text" formControlName="email" autocomplete="username" required></label>
+      <label>Passwort <input type="password" formControlName="password" autocomplete="current-password" required></label>
+      <button type="submit">Einloggen</button>
+    </form>
+    <form *ngIf="mode === 'register'" [formGroup]="registerForm" (ngSubmit)="register()">
+      <label>Username <input type="text" formControlName="username" required></label>
+      <label>E-Mail <input type="email" formControlName="email" required></label>
+      <label>Passwort <input type="password" formControlName="password" required></label>
+      <label>Passwort wiederholen <input type="password" formControlName="confirmation" required></label>
+      <button type="submit">Konto erstellen</button>
+    </form>
+    <p class="message" *ngIf="message">{{ message }}</p>
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <button class="link-button" type="button" (click)="mode = mode === 'login' ? 'register' : 'login'; error = ''">
+      {{ mode === 'login' ? 'Noch kein Konto? Registrieren' : 'Schon registriert? Zum Login' }}
+    </button>
+  </section>
+</main>

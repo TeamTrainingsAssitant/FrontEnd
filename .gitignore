@@ -1,0 +1,26 @@
+# Angular build output and cache
+angular/dist/
+angular/.angular/
+
+# Installed dependencies
+angular/node_modules/
+
+# Local environment files
+angular/.env
+angular/.env.*
+!angular/.env.example
+
+# Test and coverage output
+angular/coverage/
+
+# npm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

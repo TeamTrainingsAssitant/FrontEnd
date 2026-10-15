@@ -1,0 +1,62 @@
+<header class="topbar">
+  <button class="menu-button" type="button" (click)="menuOpen = !menuOpen">☰</button>
+  <strong>Capsule Gym <small>TRAINING</small></strong>
+  <div class="account">{{ user?.username }} <button class="link-button" type="button" (click)="logout()">Abmelden</button></div>
+</header>
+<aside class="side-menu" [class.open]="menuOpen">
+  <button type="button" (click)="selectView('overview')">Übersicht</button>
+  <button type="button" (click)="selectView('plans')">Trainingspläne</button>
+  <button type="button" (click)="selectView('create')">Training erstellen</button>
+  <button type="button" (click)="selectView('exercises')">Übungen</button>
+  <button type="button" (click)="selectView('profile')">Mein Profil</button>
+</aside>
+<main class="app-main">
+  <p class="error" *ngIf="error">{{ error }}</p>
+  <p class="message" *ngIf="message">{{ message }}</p>
+  <section *ngIf="view === 'overview'">
+    <p class="eyebrow">DEIN TRAININGSBEREICH</p>
+    <h1>Willkommen, {{ user?.username || 'Athlet' }}</h1>
+    <div class="stats"><div><strong>{{ plans.length }}</strong><span>Deine Trainingspläne</span></div><div><strong>8</strong><span>Übungen verfügbar</span></div></div>
+    <div class="feature"><h2>Dein Plan wartet auf dich.</h2><p>Wähle einen bestehenden Trainingsplan oder erstelle eine neue Einheit.</p><button (click)="selectView('plans')">Trainingspläne ansehen</button></div>
+  </section>
+  <section *ngIf="view === 'plans'">
+    <p class="eyebrow">STRUKTUR FÜR DEIN TRAINING</p><h1>Trainingspläne</h1>
+    <div class="plan-grid">
+      <article class="plan" *ngFor="let plan of plans">
+        <h2>{{ plan.name }}</h2><p>{{ plan.description || 'Keine Beschreibung hinterlegt.' }}</p>
+        <small>{{ plan.exerciseCount }} Übungen</small>
+        <div><button class="danger" (click)="deletePlan(plan)">Löschen</button></div>
+      </article>
+      <p class="muted" *ngIf="!plans.length">Du hast noch keine Trainingspläne angelegt.</p>
+    </div>
+  </section>
+  <section *ngIf="view === 'create'">
+    <p class="eyebrow">DEINE EINHEIT</p><h1>Training erstellen</h1>
+    <form class="form" [formGroup]="planForm" (ngSubmit)="createPlan()">
+      <label>Name des Trainings <input formControlName="name" required></label>
+      <label>Trainingsschwerpunkt <select formControlName="description"><option>Kraft</option><option>Ausdauer</option><option>Beweglichkeit</option><option>Ganzkörper</option></select></label>
+      <button type="submit">Trainingsplan speichern</button>
+    </form>
+  </section>
+  <section *ngIf="view === 'exercises'">
+    <p class="eyebrow">TRAININGSBIBLIOTHEK</p><h1>Übungen</h1>
+    <div class="exercise-search">
+      <input [(ngModel)]="exerciseSearch" (keyup.enter)="loadExercises()" placeholder="Übung suchen" aria-label="Übung suchen">
+      <button type="button" (click)="loadExercises()">Suchen</button>
+    </div>
+    <p class="muted" *ngIf="exercisesLoading">Übungen werden geladen …</p>
+    <div class="exercise-grid">
+      <article class="exercise" *ngFor="let exercise of exercises">
+        <img [src]="exercise.gifUrl" [alt]="exercise.name" loading="lazy">
+        <h2>{{ exercise.name }}</h2>
+        <p>{{ exercise.primaryMuscleGroups.join(' · ') }}</p>
+        <small>{{ exercise.secondaryMuscleGroups.join(' · ') }}</small>
+      </article>
+    </div>
+    <p class="muted" *ngIf="!exercisesLoading && !exercises.length">Keine Übungen gefunden.</p>
+  </section>
+  <section *ngIf="view === 'profile'">
+    <p class="eyebrow">PERSÖNLICHE ANGABEN</p><h1>Mein Profil</h1>
+    <div class="feature"><h2>{{ user?.username }}</h2><p>{{ user?.email }}</p><p class="muted">Profiländerungen werden vom Backend derzeit nicht angeboten.</p></div>
+  </section>
+</main>
