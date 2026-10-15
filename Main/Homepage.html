@@ -46,7 +46,7 @@
 
       <div class="dashboard-stats" aria-label="Trainingsübersicht">
         <div class="stat"><strong id="stat-plans">0</strong><span>Deine Trainingspläne</span></div>
-        <div class="stat"><strong id="stat-exercises">8</strong><span>Übungen verfügbar</span></div>
+        <div class="stat"><strong id="stat-exercises">0</strong><span>Übungen verfügbar</span></div>
       </div>
 
       <div class="dashboard-grid">
@@ -70,6 +70,19 @@
         <p>Behalte den Überblick oder protokolliere eine absolvierte Einheit.</p>
       </div>
       <div class="plan-grid" id="plan-grid"></div>
+    </section>
+
+    <section class="app-view" id="view-plan-detail" aria-labelledby="plan-detail-title" hidden>
+      <div class="page-heading">
+        <p class="eyebrow">Übungen im Trainingsplan</p>
+        <h1 id="plan-detail-title">Plan</h1>
+        <p id="plan-detail-description"></p>
+      </div>
+      <div class="plan-exercise-toolbar">
+        <button class="text-action" id="back-to-plans" type="button">← Zu den Trainingsplänen</button>
+        <button class="gold-button" id="open-exercise-library" type="button">Übung auswählen</button>
+      </div>
+      <div class="exercise-grid" id="plan-exercise-grid"></div>
     </section>
 
     <section class="app-view" id="view-create" aria-labelledby="create-title" hidden>

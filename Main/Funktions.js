@@ -13,6 +13,8 @@ function initializeTrainingApp() {
     let exercises = [];
     let exerciseLoadError = "";
     let plans = [];
+    let selectedPlan = null;
+    let planExercises = [];
     let profile = { displayName: userName || "Athlet", goal: "" };
     let planLoadError = "";
 
@@ -56,6 +58,7 @@ function initializeTrainingApp() {
 
     function renderOverviewStats() {
       document.querySelector("#stat-plans").textContent = plans.length;
+      document.querySelector("#stat-exercises").textContent = exercises.length;
     }
 
     function renderPlans() {
@@ -71,10 +74,71 @@ function initializeTrainingApp() {
           <p>${escapeHtml(plan.description || "Keine Beschreibung hinterlegt.")}</p>
           <span class="plan-meta">${escapeHtml(plan.exerciseCount || 0)} ÃƒÆ’Ã…â€œbungen</span>
           <div class="plan-actions">
+            <button type="button" data-open-plan="${escapeHtml(plan.id)}">Übungen verwalten</button>
             <button class="plan-delete-button" type="button" data-delete-plan="${escapeHtml(plan.id)}">LÃƒÆ’Ã‚Â¶schen</button>
           </div>
         </article>
       `).join("");
+    }
+
+    async function openPlan(plan) {
+      selectedPlan = plan;
+      document.querySelector("#plan-detail-title").textContent = plan.name;
+      document.querySelector("#plan-detail-description").textContent =
+        plan.description || "Keine Beschreibung hinterlegt.";
+      setView("plan-detail");
+      try {
+        planExercises = await requestJson(`/plans/${plan.id}/exercises`);
+        renderPlanExercises();
+      } catch (error) {
+        planExercises = [];
+        document.querySelector("#plan-exercise-grid").innerHTML =
+          `<p class="empty-state">${escapeHtml(error.message || "Planübungen konnten nicht geladen werden.")}</p>`;
+      }
+    }
+
+    function renderPlanExercises() {
+      const grid = document.querySelector("#plan-exercise-grid");
+      grid.innerHTML = planExercises.map((exercise) => `
+        <article class="exercise-item">
+          ${exercise.gifUrl ? `<img src="${escapeHtml(exercise.gifUrl)}" alt="" loading="lazy">` : ""}
+          <strong>${escapeHtml(exercise.position + ". " + exercise.name)}</strong>
+          <span>${escapeHtml((exercise.primaryMuscleGroups || []).join(" · "))}</span>
+          <small>${escapeHtml(exercise.note || "Keine Notiz")}</small>
+          <div class="exercise-actions">
+            <button type="button" data-edit-note="${escapeHtml(exercise.id)}">Notiz bearbeiten</button>
+            <button class="plan-delete-button" type="button" data-remove-exercise="${escapeHtml(exercise.id)}">Entfernen</button>
+          </div>
+        </article>
+      `).join("") || '<p class="empty-state">Noch keine Übungen in diesem Plan.</p>';
+    }
+
+    async function addExerciseToSelectedPlan(exercise) {
+      if (!selectedPlan) {
+        setView("plans");
+        document.querySelector("#create-message").textContent =
+          "Bitte zuerst bei einem Trainingsplan „Übungen verwalten“ auswählen.";
+        return;
+      }
+      const note = window.prompt("Optionale Notiz zur Übung:", "");
+      if (note === null) return;
+      try {
+        const added = await requestJson(`/plans/${selectedPlan.id}/exercises`, {
+          method: "POST",
+          body: JSON.stringify({ externalId: exercise.externalId, note: note || null })
+        });
+        planExercises.push(added);
+        selectedPlan.exerciseCount = planExercises.length;
+        plans = plans.map((plan) => plan.id === selectedPlan.id ? selectedPlan : plan);
+        renderPlanExercises();
+        renderPlans();
+        setView("plan-detail");
+      } catch (error) {
+        document.querySelector("#exercise-grid").insertAdjacentHTML(
+          "afterbegin",
+          `<p class="empty-state">${escapeHtml(error.message || "Übung konnte nicht hinzugefügt werden.")}</p>`
+        );
+      }
     }
 
     async function loadExercises(query = "") {
@@ -85,6 +149,7 @@ function initializeTrainingApp() {
         const parameter = encodeURIComponent(query.trim());
         exercises = await requestJson(`/exercises?name=${parameter}&limit=20`);
         renderExercises();
+        renderOverviewStats();
       } catch (error) {
         exercises = [];
         exerciseLoadError = error.message || "ÃƒÆ’Ã…â€œbungen konnten nicht geladen werden.";
@@ -100,6 +165,7 @@ function initializeTrainingApp() {
           <span>${escapeHtml((exercise.primaryMuscleGroups || []).join(" Ãƒâ€šÃ‚Â· ") || "Muskelgruppe nicht angegeben")}</span>
           <small>${escapeHtml((exercise.secondaryMuscleGroups || []).join(" Ãƒâ€šÃ‚Â· "))}</small>
         </article>
+          <button class="add-exercise-button" type="button" data-add-exercise="${escapeHtml(exercise.externalId)}">Zu Plan hinzufügen</button>
       `).join("") || `<p class="empty-state">${escapeHtml(exerciseLoadError || "Keine passende ÃƒÆ’Ã…â€œbung gefunden.")}</p>`;
     }
 
@@ -157,6 +223,12 @@ function initializeTrainingApp() {
     });
 
     document.querySelector("#plan-grid").addEventListener("click", async (event) => {
+      const openButton = event.target.closest("[data-open-plan]");
+      if (openButton) {
+        const plan = plans.find((item) => String(item.id) === openButton.dataset.openPlan);
+        if (plan) await openPlan(plan);
+        return;
+      }
       const deleteButton = event.target.closest("[data-delete-plan]");
       if (deleteButton) {
         const plan = plans.find((item) => item.id === deleteButton.dataset.deletePlan);
@@ -172,6 +244,51 @@ function initializeTrainingApp() {
         }
         return;
       }
+    });
+
+    document.querySelector("#plan-exercise-grid").addEventListener("click", async (event) => {
+      const removeButton = event.target.closest("[data-remove-exercise]");
+      const editButton = event.target.closest("[data-edit-note]");
+      const exerciseId = removeButton?.dataset.removeExercise || editButton?.dataset.editNote;
+      const exercise = planExercises.find((item) => String(item.id) === exerciseId);
+      if (!selectedPlan || !exercise) return;
+
+      if (removeButton) {
+        if (!window.confirm(`„${exercise.name}“ aus dem Plan entfernen?`)) return;
+        try {
+          await requestJson(`/plans/${selectedPlan.id}/exercises/${exercise.id}`, { method: "DELETE" });
+          planExercises = planExercises.filter((item) => item.id !== exercise.id);
+          selectedPlan.exerciseCount = planExercises.length;
+          plans = plans.map((plan) => plan.id === selectedPlan.id ? selectedPlan : plan);
+          renderPlanExercises();
+          renderPlans();
+        } catch (error) {
+          window.alert(error.message || "Übung konnte nicht entfernt werden.");
+        }
+        return;
+      }
+
+      const note = window.prompt("Notiz bearbeiten:", exercise.note || "");
+      if (note === null) return;
+      try {
+        const updated = await requestJson(`/plans/${selectedPlan.id}/exercises/${exercise.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ note: note || null })
+        });
+        planExercises = planExercises.map((item) => item.id === updated.id ? updated : item);
+        renderPlanExercises();
+      } catch (error) {
+        window.alert(error.message || "Notiz konnte nicht gespeichert werden.");
+      }
+    });
+
+    document.querySelector("#back-to-plans").addEventListener("click", () => setView("plans"));
+    document.querySelector("#open-exercise-library").addEventListener("click", () => setView("exercises"));
+    document.querySelector("#exercise-grid").addEventListener("click", (event) => {
+      const addButton = event.target.closest("[data-add-exercise]");
+      if (!addButton) return;
+      const exercise = exercises.find((item) => String(item.externalId) === addButton.dataset.addExercise);
+      if (exercise) addExerciseToSelectedPlan(exercise);
     });
 
     document.querySelector("#create-form").addEventListener("submit", async (event) => {

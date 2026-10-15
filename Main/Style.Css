@@ -355,6 +355,13 @@ h2, h3 { font-family: "Saiyan Sans", "Segoe UI", sans-serif; font-weight: 400; t
 .plan-card .plan-delete-button { border: 1px solid #754747; color: #efb8b8; background: transparent; }
 .plan-card .plan-delete-button:hover { background: #3b2323; }
 .plans-empty { grid-column: 1 / -1; }
+.plan-exercise-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.plan-exercise-toolbar .gold-button { margin: 0; }
+.exercise-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.exercise-actions button, .add-exercise-button { width: auto; min-height: 34px; margin: 0; padding: 0 11px; font-size: 11px; }
+.exercise-actions .plan-delete-button { border: 1px solid #754747; color: #efb8b8; background: transparent; }
+.exercise-actions .plan-delete-button:hover { background: #3b2323; }
+.add-exercise-button { margin-top: 12px; }
 
 .form-layout { max-width: 650px; padding: 24px; border: 1px solid var(--line); border-radius: 4px; background: #1b1b1b; }
 .form-layout .field { margin-bottom: 18px; }
