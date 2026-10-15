@@ -16,7 +16,7 @@
   <section *ngIf="view === 'overview'">
     <p class="eyebrow">DEIN TRAININGSBEREICH</p>
     <h1>Willkommen, {{ user?.username || 'Athlet' }}</h1>
-    <div class="stats"><div><strong>{{ plans.length }}</strong><span>Deine Trainingspläne</span></div><div><strong>8</strong><span>Übungen verfügbar</span></div></div>
+    <div class="stats"><div><strong>{{ plans.length }}</strong><span>Deine Trainingspläne</span></div><div><strong>{{ exercises.length }}</strong><span>Übungen verfügbar</span></div></div>
     <div class="feature"><h2>Dein Plan wartet auf dich.</h2><p>Wähle einen bestehenden Trainingsplan oder erstelle eine neue Einheit.</p><button (click)="selectView('plans')">Trainingspläne ansehen</button></div>
   </section>
   <section *ngIf="view === 'plans'">
@@ -25,10 +25,43 @@
       <article class="plan" *ngFor="let plan of plans">
         <h2>{{ plan.name }}</h2><p>{{ plan.description || 'Keine Beschreibung hinterlegt.' }}</p>
         <small>{{ plan.exerciseCount }} Übungen</small>
-        <div><button class="danger" (click)="deletePlan(plan)">Löschen</button></div>
+        <div><button type="button" (click)="selectPlan(plan)">Übungen verwalten</button><button class="danger" (click)="deletePlan(plan)">Löschen</button></div>
       </article>
       <p class="muted" *ngIf="!plans.length">Du hast noch keine Trainingspläne angelegt.</p>
     </div>
+  </section>
+  <section *ngIf="view === 'plans' && selectedPlan">
+    <p class="eyebrow">ÜBUNGEN IM PLAN</p><h1>{{ selectedPlan.name }}</h1>
+    <div class="feature" *ngIf="exerciseToAdd">
+      <h2>{{ exerciseToAdd.name }} hinzufügen</h2>
+      <label>Notiz (optional) <input [(ngModel)]="exerciseNote" maxlength="500"></label>
+      <button type="button" (click)="addExercise()">Zum Plan hinzufügen</button>
+      <button type="button" class="link-button" (click)="exerciseToAdd = null">Abbrechen</button>
+    </div>
+    <div class="plan-exercises">
+      <article class="exercise" *ngFor="let exercise of planExercises">
+        <img *ngIf="exercise.gifUrl" [src]="exercise.gifUrl" [alt]="exercise.name" loading="lazy">
+        <h2>{{ exercise.position }}. {{ exercise.name }}</h2>
+        <p>{{ exercise.primaryMuscleGroups.join(' · ') }}</p>
+        <ng-container *ngIf="editingExerciseId === exercise.id; else noteText">
+          <input [(ngModel)]="editingNote" maxlength="500" aria-label="Notiz bearbeiten">
+          <button type="button" (click)="saveExerciseNote(exercise)">Speichern</button>
+          <button type="button" class="link-button" (click)="editingExerciseId = null">Abbrechen</button>
+        </ng-container>
+        <ng-template #noteText><p class="muted">{{ exercise.note || 'Keine Notiz' }}</p><button type="button" (click)="startEditingExercise(exercise)">Notiz bearbeiten</button></ng-template>
+        <button type="button" class="danger" (click)="deleteExercise(exercise)">Entfernen</button>
+      </article>
+      <p class="muted" *ngIf="!planExercises.length">Noch keine Übungen im Plan. Wähle im Bereich „Übungen“ eine Übung aus.</p>
+    </div>
+  </section>
+  <section *ngIf="view === 'plans' && !selectedPlan && exerciseToAdd">
+    <p class="eyebrow">ZIELPLAN AUSWÄHLEN</p><h1>{{ exerciseToAdd.name }}</h1>
+    <label>Übung hinzufügen zu
+      <select value="" (change)="selectPlanById($any($event.target).value)">
+        <option value="">Bitte Plan auswählen</option>
+        <option *ngFor="let plan of plans" [value]="plan.id">{{ plan.name }}</option>
+      </select>
+    </label>
   </section>
   <section *ngIf="view === 'create'">
     <p class="eyebrow">DEINE EINHEIT</p><h1>Training erstellen</h1>
@@ -51,6 +84,7 @@
         <h2>{{ exercise.name }}</h2>
         <p>{{ exercise.primaryMuscleGroups.join(' · ') }}</p>
         <small>{{ exercise.secondaryMuscleGroups.join(' · ') }}</small>
+        <button type="button" [disabled]="!plans.length" (click)="chooseExercise(exercise); selectView('plans')">Zu Plan hinzufügen</button>
       </article>
     </div>
     <p class="muted" *ngIf="!exercisesLoading && !exercises.length">Keine Übungen gefunden.</p>

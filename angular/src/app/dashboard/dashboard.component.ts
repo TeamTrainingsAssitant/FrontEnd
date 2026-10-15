@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../auth.service';
-import { Exercise, Plan, PlanService } from '../plan.service';
+import { Exercise, Plan, PlanExercise, PlanService } from '../plan.service';
 
 type View = 'overview' | 'plans' | 'create' | 'exercises' | 'profile';
 
@@ -28,6 +28,12 @@ export class DashboardComponent {
   exercises: Exercise[] = [];
   exerciseSearch = '';
   exercisesLoading = false;
+  selectedPlan: Plan | null = null;
+  planExercises: PlanExercise[] = [];
+  exerciseToAdd: Exercise | null = null;
+  exerciseNote = '';
+  editingExerciseId: number | null = null;
+  editingNote = '';
 
   readonly planForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(60)]],
@@ -55,6 +61,78 @@ export class DashboardComponent {
       next: (plans) => this.plans = plans,
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingspläne konnten nicht geladen werden.')
     });
+  }
+
+  selectPlan(plan: Plan): void {
+    this.selectedPlan = plan;
+    this.planExercises = [];
+    this.error = '';
+    this.plansApi.listExercises(plan.id).subscribe({
+      next: (exercises) => this.planExercises = exercises,
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Planübungen konnten nicht geladen werden.')
+    });
+  }
+
+  chooseExercise(exercise: Exercise): void {
+    this.exerciseToAdd = exercise;
+    this.exerciseNote = '';
+  }
+
+  selectPlanById(planId: string): void {
+    const plan = this.plans.find((item) => item.id === Number(planId));
+    if (plan) this.selectPlan(plan);
+  }
+
+  addExercise(): void {
+    if (!this.selectedPlan || !this.exerciseToAdd) return;
+    this.plansApi.addExercise(this.selectedPlan.id, this.exerciseToAdd.externalId, this.exerciseNote).subscribe({
+      next: (exercise) => {
+        this.planExercises = [...this.planExercises, exercise];
+        this.updatePlanCount(this.selectedPlan!.id, this.planExercises.length);
+        this.exerciseToAdd = null;
+        this.exerciseNote = '';
+        this.message = 'Übung zum Plan hinzugefügt.';
+      },
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Übung konnte nicht hinzugefügt werden.')
+    });
+  }
+
+  startEditingExercise(exercise: PlanExercise): void {
+    this.editingExerciseId = exercise.id;
+    this.editingNote = exercise.note || '';
+  }
+
+  saveExerciseNote(exercise: PlanExercise): void {
+    if (!this.selectedPlan) return;
+    this.plansApi.updateExercise(this.selectedPlan.id, exercise.id, this.editingNote).subscribe({
+      next: (updated) => {
+        this.planExercises = this.planExercises.map((item) => item.id === updated.id ? updated : item);
+        this.editingExerciseId = null;
+        this.message = 'Notiz gespeichert.';
+      },
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Notiz konnte nicht gespeichert werden.')
+    });
+  }
+
+  deleteExercise(exercise: PlanExercise): void {
+    if (!this.selectedPlan || !confirm(`„${exercise.name}“ aus dem Plan entfernen?`)) return;
+    this.plansApi.deleteExercise(this.selectedPlan.id, exercise.id).subscribe({
+      next: () => {
+        this.planExercises = this.planExercises
+          .filter((item) => item.id !== exercise.id)
+          .map((item, index) => ({ ...item, position: index + 1 }));
+        this.updatePlanCount(this.selectedPlan!.id, this.planExercises.length);
+        this.message = 'Übung aus dem Plan entfernt.';
+      },
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Übung konnte nicht entfernt werden.')
+    });
+  }
+
+  private updatePlanCount(planId: number, exerciseCount: number): void {
+    this.plans = this.plans.map((plan) => plan.id === planId ? { ...plan, exerciseCount } : plan);
+    if (this.selectedPlan?.id === planId) {
+      this.selectedPlan = { ...this.selectedPlan, exerciseCount };
+    }
   }
 
   createPlan(): void {

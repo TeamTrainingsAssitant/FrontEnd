@@ -18,6 +18,12 @@ export interface Exercise {
   secondaryMuscleGroups: string[];
 }
 
+export interface PlanExercise extends Exercise {
+  id: number;
+  position: number;
+  note: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PlanService {
   private readonly http = inject(HttpClient);
@@ -29,6 +35,18 @@ export class PlanService {
   }
   delete(id: number): Observable<unknown> {
     return this.http.delete(`${this.api}/${id}`);
+  }
+  listExercises(planId: number): Observable<PlanExercise[]> {
+    return this.http.get<PlanExercise[]>(`${this.api}/${planId}/exercises`);
+  }
+  addExercise(planId: number, externalId: string, note: string): Observable<PlanExercise> {
+    return this.http.post<PlanExercise>(`${this.api}/${planId}/exercises`, { externalId, note: note || null });
+  }
+  updateExercise(planId: number, exerciseId: number, note: string): Observable<PlanExercise> {
+    return this.http.put<PlanExercise>(`${this.api}/${planId}/exercises/${exerciseId}`, { note: note || null });
+  }
+  deleteExercise(planId: number, exerciseId: number): Observable<unknown> {
+    return this.http.delete(`${this.api}/${planId}/exercises/${exerciseId}`);
   }
   searchExercises(name = ''): Observable<Exercise[]> {
     return this.http.get<Exercise[]>(`${this.api.replace('/plans', '/exercises')}?name=${encodeURIComponent(name)}&limit=20`);
