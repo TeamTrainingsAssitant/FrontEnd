@@ -40,3 +40,8 @@ parallel unter `http://localhost:4200/auth`.
 Für ein Angular-Deployment müssen die Angular-Routen auf `index.html`
 zurückfallen. Der aktuelle Angular-Produktionsbuild entsteht mit
 `npm run build` unter `angular/dist/capsule-gym-frontend`.
+
+Für Heroku muss der Node.js-Buildpack aktiviert sein. Der Root-`Procfile`
+baut das Angular-Projekt und startet anschließend den Produktionsserver.
+Der MPA-Touchpoint bleibt als separater Prüfungs-Touchpoint unter `Main`
+erhalten.
