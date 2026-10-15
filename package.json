@@ -2,7 +2,7 @@
   "name": "trainingsplan-frontend",
   "private": true,
   "scripts": {
-    "build": "npm --prefix angular ci && npm --prefix angular run build",
+    "build": "npm --prefix angular ci --include=dev && npm --prefix angular run build",
     "start": "npx serve -s angular/dist/capsule-gym-frontend -l $PORT"
   },
   "dependencies": {
