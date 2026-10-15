@@ -111,8 +111,17 @@ input, select {
 .plan div button { flex: 1; padding: 0 8px; font-size: 12px; }
 .danger { color: #fff; background: var(--danger); }
 .danger:hover { background: var(--danger-hover); }
-.exercise-search { display: flex; gap: 10px; max-width: 520px; margin: 20px 0; }
-.exercise-search input { flex: 1; }
+.exercise-search {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 900px;
+  margin: 20px 0;
+}
+.exercise-search input {
+  flex: 1 1 360px;
+  min-width: 260px;
+}
 .exercise img { display: block; width: 100%; height: 170px; margin-bottom: 12px; object-fit: contain; background: var(--background); }
 .exercise h2 { margin: 0 0 8px; font-size: 16px; }
 .exercise p { color: #bbb; font-size: 12px; }
@@ -123,4 +132,8 @@ input, select {
   .app-main { padding: 35px 18px; }
   .account { font-size: 12px; }
   .stats { flex-direction: column; }
+  .exercise-search { flex-wrap: wrap; }
+  .exercise-search input,
+  .exercise-search select,
+  .exercise-search button { flex: 1 1 100%; min-width: 0; }
 }
