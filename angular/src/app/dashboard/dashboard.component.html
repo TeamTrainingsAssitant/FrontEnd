@@ -25,9 +25,20 @@
       <article class="plan" *ngFor="let plan of plans">
         <h2>{{ plan.name }}</h2><p>{{ plan.description || 'Keine Beschreibung hinterlegt.' }}</p>
         <small>{{ plan.exerciseCount }} Übungen</small>
-        <div><button type="button" (click)="selectPlan(plan)">Übungen verwalten</button><button class="danger" (click)="deletePlan(plan)">Löschen</button></div>
+        <div><button type="button" (click)="selectPlan(plan)">Übungen verwalten</button><button type="button" (click)="startEditingPlan(plan)">Bearbeiten</button><button class="danger" (click)="deletePlan(plan)">Löschen</button></div>
       </article>
       <p class="muted" *ngIf="!plans.length">Du hast noch keine Trainingspläne angelegt.</p>
+    </div>
+    <div class="feature" *ngIf="editingPlan">
+      <h2>Trainingsplan bearbeiten</h2>
+      <label>Name <input [(ngModel)]="editPlanName" maxlength="60"></label>
+      <label>Trainingsschwerpunkt
+        <select [(ngModel)]="editPlanDescription">
+          <option>Kraft</option><option>Ausdauer</option><option>Beweglichkeit</option><option>Ganzkörper</option>
+        </select>
+      </label>
+      <button type="button" (click)="savePlan()">Änderungen speichern</button>
+      <button type="button" class="link-button" (click)="editingPlan = null">Abbrechen</button>
     </div>
   </section>
   <section *ngIf="view === 'plans' && selectedPlan">
@@ -75,6 +86,14 @@
     <p class="eyebrow">TRAININGSBIBLIOTHEK</p><h1>Übungen</h1>
     <div class="exercise-search">
       <input [(ngModel)]="exerciseSearch" (keyup.enter)="loadExercises()" placeholder="Übung suchen" aria-label="Übung suchen">
+      <select [(ngModel)]="selectedMuscle" aria-label="Muskelgruppe">
+        <option value="">Alle Muskelgruppen</option>
+        <option *ngFor="let muscle of muscles" [value]="muscle">{{ muscle }}</option>
+      </select>
+      <select [(ngModel)]="selectedBodyPart" aria-label="Körperbereich">
+        <option value="">Alle Körperbereiche</option>
+        <option *ngFor="let bodyPart of bodyParts" [value]="bodyPart">{{ bodyPart }}</option>
+      </select>
       <button type="button" (click)="loadExercises()">Suchen</button>
     </div>
     <p class="muted" *ngIf="exercisesLoading">Übungen werden geladen …</p>
@@ -84,13 +103,25 @@
         <h2>{{ exercise.name }}</h2>
         <p>{{ exercise.primaryMuscleGroups.join(' · ') }}</p>
         <small>{{ exercise.secondaryMuscleGroups.join(' · ') }}</small>
+        <button type="button" (click)="showExerciseDetails(exercise)">Details anzeigen</button>
         <button type="button" [disabled]="!plans.length" (click)="chooseExercise(exercise); selectView('plans')">Zu Plan hinzufügen</button>
       </article>
     </div>
     <p class="muted" *ngIf="!exercisesLoading && !exercises.length">Keine Übungen gefunden.</p>
+    <div class="feature" *ngIf="selectedExercise">
+      <h2>{{ selectedExercise.name }}</h2>
+      <p>{{ selectedExercise.bodyParts.join(' · ') }} · {{ selectedExercise.equipments.join(' · ') }}</p>
+      <ol><li *ngFor="let instruction of selectedExercise.instructions">{{ instruction }}</li></ol>
+      <button type="button" class="link-button" (click)="selectedExercise = null">Details schließen</button>
+    </div>
   </section>
   <section *ngIf="view === 'profile'">
     <p class="eyebrow">PERSÖNLICHE ANGABEN</p><h1>Mein Profil</h1>
-    <div class="feature"><h2>{{ user?.username }}</h2><p>{{ user?.email }}</p><p class="muted">Profiländerungen werden vom Backend derzeit nicht angeboten.</p></div>
+    <div class="feature">
+      <h2>{{ user?.username }}</h2><p>{{ user?.email }}</p>
+      <button type="button" (click)="exportUserData()">Meine Daten exportieren</button>
+      <label>Konto löschen: Passwort bestätigen <input type="password" [(ngModel)]="deletePassword"></label>
+      <button type="button" class="danger" (click)="deleteAccount()">Konto dauerhaft löschen</button>
+    </div>
   </section>
 </main>

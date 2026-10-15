@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../auth.service';
-import { Exercise, Plan, PlanExercise, PlanService } from '../plan.service';
+import { Exercise, ExerciseDetails, Plan, PlanExercise, PlanService } from '../plan.service';
 
 type View = 'overview' | 'plans' | 'create' | 'exercises' | 'profile';
 
@@ -27,13 +27,22 @@ export class DashboardComponent {
   message = '';
   exercises: Exercise[] = [];
   exerciseSearch = '';
+  selectedMuscle = '';
+  selectedBodyPart = '';
+  muscles: string[] = [];
+  bodyParts: string[] = [];
   exercisesLoading = false;
+  selectedExercise: ExerciseDetails | null = null;
   selectedPlan: Plan | null = null;
   planExercises: PlanExercise[] = [];
   exerciseToAdd: Exercise | null = null;
   exerciseNote = '';
   editingExerciseId: number | null = null;
   editingNote = '';
+  editingPlan: Plan | null = null;
+  editPlanName = '';
+  editPlanDescription = '';
+  deletePassword = '';
 
   readonly planForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(60)]],
@@ -64,12 +73,36 @@ export class DashboardComponent {
   }
 
   selectPlan(plan: Plan): void {
+    this.plansApi.get(plan.id).subscribe({
+      next: (loadedPlan) => this.selectedPlan = { ...loadedPlan, exerciseCount: plan.exerciseCount },
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht geladen werden.')
+    });
     this.selectedPlan = plan;
     this.planExercises = [];
     this.error = '';
     this.plansApi.listExercises(plan.id).subscribe({
       next: (exercises) => this.planExercises = exercises,
       error: (error: unknown) => this.error = this.apiMessage(error, 'Planübungen konnten nicht geladen werden.')
+    });
+  }
+
+  startEditingPlan(plan: Plan): void {
+    this.editingPlan = plan;
+    this.editPlanName = plan.name;
+    this.editPlanDescription = plan.description || '';
+  }
+
+  savePlan(): void {
+    if (!this.editingPlan || !this.editPlanName.trim()) return;
+    this.plansApi.update(this.editingPlan.id, this.editPlanName.trim(), this.editPlanDescription.trim()).subscribe({
+      next: (updated) => {
+        const plan = { ...updated, exerciseCount: this.editingPlan!.exerciseCount };
+        this.plans = this.plans.map((item) => item.id === plan.id ? plan : item);
+        if (this.selectedPlan?.id === plan.id) this.selectedPlan = plan;
+        this.editingPlan = null;
+        this.message = 'Trainingsplan aktualisiert.';
+      },
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht aktualisiert werden.')
     });
   }
 
@@ -172,20 +205,71 @@ export class DashboardComponent {
     this.menuOpen = false;
     this.error = '';
     this.message = '';
-    if (view === 'exercises' && !this.exercises.length) this.loadExercises();
+    if (view === 'exercises' && !this.exercises.length) {
+      this.loadExerciseFilters();
+      this.loadExercises();
+    }
   }
 
   loadExercises(): void {
     this.exercisesLoading = true;
-    this.plansApi.searchExercises(this.exerciseSearch).subscribe({
-      next: (exercises) => {
-        this.exercises = exercises;
+    const muscles = this.selectedMuscle ? [this.selectedMuscle] : [];
+    this.plansApi.searchExercises(this.exerciseSearch, muscles).subscribe({
+      next: (result) => {
+        this.exercises = this.selectedBodyPart
+          ? result.exercises.filter((exercise) => exercise.bodyParts?.includes(this.selectedBodyPart))
+          : result.exercises;
         this.exercisesLoading = false;
       },
       error: (error: unknown) => {
         this.error = this.apiMessage(error, 'Übungen konnten nicht geladen werden.');
         this.exercisesLoading = false;
       }
+    });
+  }
+
+  loadExerciseFilters(): void {
+    this.plansApi.muscles().subscribe({
+      next: (muscles) => this.muscles = muscles,
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Muskelgruppen konnten nicht geladen werden.')
+    });
+    this.plansApi.bodyParts().subscribe({
+      next: (bodyParts) => this.bodyParts = bodyParts,
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Körperbereiche konnten nicht geladen werden.')
+    });
+  }
+
+  showExerciseDetails(exercise: Exercise): void {
+    this.plansApi.getExercise(exercise.externalId).subscribe({
+      next: (details) => this.selectedExercise = details,
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Übungsdetails konnten nicht geladen werden.')
+    });
+  }
+
+  exportUserData(): void {
+    this.auth.exportUserData().subscribe({
+      next: (data) => {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'capsule-gym-daten.json';
+        link.click();
+        URL.revokeObjectURL(url);
+        this.message = 'Deine Daten wurden exportiert.';
+      },
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Daten konnten nicht exportiert werden.')
+    });
+  }
+
+  deleteAccount(): void {
+    if (!this.deletePassword || !confirm('Möchtest du dein Konto wirklich dauerhaft löschen?')) return;
+    this.auth.deleteAccount(this.deletePassword).subscribe({
+      next: () => {
+        this.auth.clearSession();
+        this.router.navigateByUrl('/auth');
+      },
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Konto konnte nicht gelöscht werden.')
     });
   }
 

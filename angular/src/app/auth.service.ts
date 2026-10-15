@@ -14,6 +14,11 @@ export interface User {
   createdAt: string;
 }
 
+export interface UserExport {
+  user: User;
+  plans: unknown[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -32,6 +37,12 @@ export class AuthService {
 
   currentUser(): Observable<User> {
     return this.http.get<User>(`${this.api}/users/me`);
+  }
+  exportUserData(): Observable<UserExport> {
+    return this.http.get<UserExport>(`${this.api}/users/me/export`);
+  }
+  deleteAccount(password: string): Observable<unknown> {
+    return this.http.delete(`${this.api}/users/me`, { body: { password } });
   }
 
   logout(): Observable<unknown> {
