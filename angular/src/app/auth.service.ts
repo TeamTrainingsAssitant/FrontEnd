@@ -17,7 +17,7 @@ export interface User {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:8080/api/v1';
+  private readonly api = 'https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1';
   readonly localAdminToken = 'local-admin';
 
   login(email: string, password: string): Observable<LoginResponse> {

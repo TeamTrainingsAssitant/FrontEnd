@@ -1,4 +1,4 @@
-const MPA_API = (window.API_BASE_URL || "http://localhost:8080/api/v1").replace(/\/$/, "");
+const MPA_API = (window.API_BASE_URL || "https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1").replace(/\/$/, "");
 const MPA_TOKEN_KEY = "powerLevelToken";
 const MPA_LOCAL_TOKEN = "local-admin";
 

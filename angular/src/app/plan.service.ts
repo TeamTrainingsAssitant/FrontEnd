@@ -27,7 +27,7 @@ export interface PlanExercise extends Exercise {
 @Injectable({ providedIn: 'root' })
 export class PlanService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:8080/api/v1/plans';
+  private readonly api = 'https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1/plans';
 
   list(): Observable<Plan[]> { return this.http.get<Plan[]>(this.api); }
   create(name: string, description: string): Observable<Plan> {
