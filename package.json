@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "npm --prefix angular ci --include=dev && npm --prefix angular run build",
-    "start": "npx serve -s angular/dist/capsule-gym-frontend -l $PORT"
+    "start": "npx serve -s angular/dist/capsule-gym-frontend/browser -l $PORT"
   },
   "dependencies": {
     "serve": "^14.2.4"
