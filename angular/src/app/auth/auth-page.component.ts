@@ -29,6 +29,12 @@ export class AuthPageComponent {
     confirmation: ['', Validators.required]
   });
 
+  constructor() {
+    if (new URLSearchParams(window.location.search).get('mode') === 'register') {
+      this.mode = 'register';
+    }
+  }
+
   login(): void {
     const { email, password } = this.loginForm.getRawValue();
     if (this.loginForm.invalid) return;

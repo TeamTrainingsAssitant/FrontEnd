@@ -164,8 +164,8 @@ function initializeTrainingApp() {
           <strong>${escapeHtml(exercise.name)}</strong>
           <span>${escapeHtml((exercise.primaryMuscleGroups || []).join(" Ãƒâ€šÃ‚Â· ") || "Muskelgruppe nicht angegeben")}</span>
           <small>${escapeHtml((exercise.secondaryMuscleGroups || []).join(" Ãƒâ€šÃ‚Â· "))}</small>
-        </article>
           <button class="add-exercise-button" type="button" data-add-exercise="${escapeHtml(exercise.externalId)}">Zu Plan hinzufügen</button>
+        </article>
       `).join("") || `<p class="empty-state">${escapeHtml(exerciseLoadError || "Keine passende ÃƒÆ’Ã…â€œbung gefunden.")}</p>`;
     }
 
