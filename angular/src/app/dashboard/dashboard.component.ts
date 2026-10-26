@@ -47,6 +47,8 @@ export class DashboardComponent {
   editingReps: number | null = null;
   editingWeight: number | null = null;
   deletePassword = '';
+  // Rückfrage vor dem Löschen des Kontos anzeigen
+  confirmAccountDelete = false;
 
   readonly planForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(60)]],
@@ -303,7 +305,7 @@ export class DashboardComponent {
   }
 
   deleteAccount(): void {
-    if (!this.deletePassword || !confirm('Möchtest du dein Konto wirklich dauerhaft löschen?')) return;
+    if (!this.deletePassword) return;
     this.auth.deleteAccount(this.deletePassword).subscribe({
       next: () => {
         this.auth.clearSession();

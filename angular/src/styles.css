@@ -179,7 +179,7 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 
 
 /* Dashboard content */
-.app-main { width: min(100%, 1240px); min-height: calc(100vh - 76px); margin: 0 auto; padding: clamp(36px, 6vw, 76px) clamp(18px, 4vw, 54px) 100px; }
+.app-main { width: 100%; min-height: calc(100vh - 76px); margin: 0 auto; padding: 24px clamp(16px, 3vw, 40px) 60px; }
 .app-main > section { animation: rise-in .32s ease both; }
 @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -267,3 +267,7 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 /* Lösch-Rückfrage in der Plan-Spalte */
 .delete-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--danger); border-radius: var(--radius-small); }
 .delete-confirm p { width: 100%; margin: 0; }
+
+/* Profil-Fenster */
+.profile-dialog { display: grid; gap: 14px; }
+.profile-dialog h2, .profile-dialog p { margin: 0; }

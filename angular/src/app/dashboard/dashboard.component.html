@@ -9,12 +9,6 @@
 <main class="app-main">
   <p class="error" *ngIf="error">{{ error }}</p>
 
-  <section class="feature" *ngIf="profileOpen">
-    <h2>{{ user?.username }}</h2><p class="muted">{{ user?.email }}</p>
-    <button type="button" (click)="exportUserData()">Meine Daten exportieren</button>
-    <label>Konto löschen: Passwort bestätigen <input type="password" [(ngModel)]="deletePassword"></label>
-    <button type="button" class="danger" (click)="deleteAccount()">Konto dauerhaft löschen</button>
-  </section>
 
   <div class="planner">
     <aside class="rail" aria-label="Übungen">
@@ -130,6 +124,24 @@
         <button type="button" class="danger" [disabled]="alternativeActionLoading" (click)="confirmExerciseRemoval()">Ohne Ersatz entfernen</button>
         <button type="button" class="link-button" (click)="cancelExerciseRemoval()">Zurück</button>
       </div>
+    </div>
+  </section>
+</div>
+
+<!-- Profil als Fenster in der Mitte -->
+<div class="dialog-backdrop" *ngIf="profileOpen">
+  <section class="dialog profile-dialog" role="dialog" aria-modal="true" aria-label="Mein Profil">
+    <h2>{{ user?.username }}</h2><p class="muted">{{ user?.email }}</p>
+    <button type="button" (click)="exportUserData()">Meine Daten exportieren</button>
+    <label>Konto löschen: Passwort bestätigen <input type="password" [(ngModel)]="deletePassword"></label>
+    <button type="button" class="danger" *ngIf="!confirmAccountDelete" [disabled]="!deletePassword" (click)="confirmAccountDelete = true">Konto dauerhaft löschen</button>
+    <div class="delete-confirm" *ngIf="confirmAccountDelete">
+      <p>Konto und alle Trainingspläne wirklich löschen?</p>
+      <button type="button" class="danger" (click)="deleteAccount()">Ja, löschen</button>
+      <button type="button" class="link-button" (click)="confirmAccountDelete = false">Abbrechen</button>
+    </div>
+    <div class="editor-actions">
+      <button type="button" class="link-button" (click)="profileOpen = false; confirmAccountDelete = false">Schließen</button>
     </div>
   </section>
 </div>
