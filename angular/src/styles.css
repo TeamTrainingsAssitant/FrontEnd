@@ -335,3 +335,7 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 .dialog-head p { margin: 4px 0 0; }
 .dialog textarea { width: 100%; min-height: 72px; padding: 10px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-small); color: var(--text); background: #0d121b; font: inherit; }
 .dialog .editor-actions button[type="submit"] { margin-left: auto; }
+
+/* Drag & Drop */
+.rail-list .column-card { cursor: grab; }
+.plan-column.drop-target { border-style: dashed; border-color: var(--accent); }

@@ -33,7 +33,8 @@
 
       <p class="muted" *ngIf="exercisesLoading">Übungen werden geladen …</p>
       <ul class="rail-list">
-        <li class="column-card" *ngFor="let exercise of exercises">
+        <li class="column-card" *ngFor="let exercise of exercises" draggable="true"
+            (dragstart)="draggedExercise = exercise" (dragend)="draggedExercise = null">
           <img [src]="exercise.gifUrl" alt="" loading="lazy">
           <div>
             <strong>{{ exercise.name }}</strong>
@@ -49,7 +50,8 @@
       <p class="eyebrow">DEIN TRAINING</p>
       <h1>Trainingspläne</h1>
       <div class="board">
-        <section class="plan-column" *ngFor="let plan of plans">
+        <section class="plan-column" *ngFor="let plan of plans" [class.drop-target]="draggedExercise"
+                 (dragover)="$event.preventDefault()" (drop)="dropOnPlan(plan)">
           <header class="plan-column-head">
             <h2>{{ plan.name }}</h2>
             <button class="icon-button" type="button" title="Umbenennen" (click)="renamePlan(plan)">✎</button>

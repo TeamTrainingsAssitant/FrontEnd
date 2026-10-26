@@ -25,6 +25,8 @@ export class DashboardComponent {
   targetPlanId: number | null = null;
   // Übung, deren Dialog gerade offen ist
   dialogExercise: PlanExercise | null = null;
+  // Übung, die gerade aus der Übungsleiste gezogen wird
+  draggedExercise: Exercise | null = null;
   user: User | null = null;
   error = '';
   message = '';
@@ -108,7 +110,17 @@ export class DashboardComponent {
       this.error = 'Lege zuerst einen Trainingsplan an.';
       return;
     }
-    const planId = this.targetPlanId;
+    this.addExerciseToPlan(this.targetPlanId, exercise);
+  }
+
+  // Drag & Drop: Übung wurde auf eine Plan-Spalte fallen gelassen
+  dropOnPlan(plan: Plan): void {
+    if (!this.draggedExercise) return;
+    this.addExerciseToPlan(plan.id, this.draggedExercise);
+    this.draggedExercise = null;
+  }
+
+  addExerciseToPlan(planId: number, exercise: Exercise): void {
     this.plansApi.addExercise(planId, exercise.externalId, '', null, null, null).subscribe({
       next: () => {
         this.loadColumn(planId);
