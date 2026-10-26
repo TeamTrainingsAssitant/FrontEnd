@@ -1,8 +1,10 @@
-# Frontend
+# Capsule Gym – Angular-SPA
 
-Das produktive SPA-Frontend befindet sich im Verzeichnis [`angular`](./angular).
-Es verwendet Angular Standalone Components, Angular Reactive Forms, `HttpClient`
-und einen Bearer-Token-Interceptor.
+Die Angular-SPA ist das zentrale Frontend des Projekts. Sie umfasst Login,
+Registrierung, Dashboard, Trainingspläne und die Übungsbibliothek. Die früheren
+statischen MPA-Seiten sind entfernt.
+
+## Lokal starten
 
 ```powershell
 cd FrontEnd\angular
@@ -10,30 +12,46 @@ npm install
 npm start
 ```
 
-Danach ist die SPA unter `http://localhost:4200` verfügbar. Das Backend wird
-unter `https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1` erwartet.
+Die Anwendung läuft anschließend unter `http://localhost:4200`. Login,
+Registrierung und Logout verwenden das REST-Backend. Planverwaltung und
+Übungssuche laufen über das GraphQL-Gateway.
 
-Trainingspläne, Planübungen und die Übungssuche laufen über das GraphQL-Gateway
-(Repo `GRAPHQL`, `PlanService` und `GraphqlService`). Login, Registrierung und Logout
-bleiben REST. Die Gateway-Adresse steht in `angular/src/app/config.ts`; lokal wird
-`http://localhost:4000/graphql` verwendet (Gateway mit `npm run dev` starten).
+Für GraphQL muss das Gateway in einem zweiten Terminal aus der Projektwurzel
+(`WebApp`) gestartet werden:
 
-## Frontend
+```powershell
+cd GRAPHQL
+npm install
+npm run dev
+```
 
-Die Angular-SPA unter [`angular`](./angular) ist die zentrale Single-Page-Anwendung
-mit Login, Registrierung, Dashboard, Trainingsplänen und Planübungen.
+Das Gateway erwartet standardmäßig ein lokales Backend unter
+`http://localhost:8080/api/v1`. Seine Adresse kann über `BACKEND_BASE_URL`
+konfiguriert werden. Die Gateway-Adresse der SPA steht in
+`angular/src/app/config.ts`; lokal ist sie `http://localhost:4000/graphql`.
 
-Die Angular-SPA ist das Frontend des Projekts. Sie umfasst Login,
-Registrierung, Dashboard, Trainingspläne und Planübungen. Die bisherigen
-statischen HTML-Seiten und ihre MPA-Skripte sind entfernt.
+## Build und Deployment
+
+```powershell
+cd FrontEnd\angular
+npm run build
+```
+
+Der Build liegt unter `angular/dist/capsule-gym-frontend/browser`. Für Heroku wird das
+FrontEnd-Root-Verzeichnis mit dem Node.js-Buildpack gebaut und gestartet; die
+Root-`Procfile` verwendet dafür die Skripte aus `FrontEnd/package.json`.
 
 Öffentliche Frontend-Adresse des bestehenden Deployments:
 
 `https://trainingsplan-frontend-be8f5157e428.herokuapp.com/`
 
-Für ein Angular-Deployment müssen die Angular-Routen auf `index.html`
-zurückfallen. Der aktuelle Angular-Produktionsbuild entsteht mit
-`npm run build` unter `angular/dist/capsule-gym-frontend`.
+## Struktur der SPA
 
-Für Heroku muss der Node.js-Buildpack aktiviert sein. Der Root-`Procfile`
-baut das Angular-Projekt und startet anschließend den Produktionsserver.
+- `angular/src/main.ts`: Angular-Bootstrap mit Router und `HttpClient`
+- `angular/src/app/app.routes.ts`: Routen und Auth-Guard
+- `angular/src/app/auth/`: Login und Registrierung
+- `angular/src/app/dashboard/`: geschützter Bereich und Planverwaltung
+- `angular/src/app/core/`: querschnittliche Funktionen wie der Auth-Guard
+- `angular/src/app/auth.service.ts`: Authentifizierung, Session und Profil
+- `angular/src/app/plan.service.ts` und `graphql.service.ts`: GraphQL-Zugriff auf Pläne und Übungen
+- `angular/src/assets/fonts/`: Schriftart und Attribution
