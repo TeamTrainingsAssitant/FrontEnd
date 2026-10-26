@@ -36,8 +36,14 @@ export class DashboardComponent {
   planExercises: PlanExercise[] = [];
   exerciseToAdd: Exercise | null = null;
   exerciseNote = '';
+  exerciseSets: number | null = null;
+  exerciseReps: number | null = null;
+  exerciseWeight: number | null = null;
   editingExerciseId: number | null = null;
   editingNote = '';
+  editingSets: number | null = null;
+  editingReps: number | null = null;
+  editingWeight: number | null = null;
   editingPlan: Plan | null = null;
   editPlanName = '';
   editPlanDescription = '';
@@ -104,6 +110,9 @@ export class DashboardComponent {
   chooseExercise(exercise: Exercise): void {
     this.exerciseToAdd = exercise;
     this.exerciseNote = '';
+    this.exerciseSets = null;
+    this.exerciseReps = null;
+    this.exerciseWeight = null;
   }
 
   selectPlanById(planId: string): void {
@@ -113,12 +122,22 @@ export class DashboardComponent {
 
   addExercise(): void {
     if (!this.selectedPlan || !this.exerciseToAdd) return;
-    this.plansApi.addExercise(this.selectedPlan.id, this.exerciseToAdd.externalId, this.exerciseNote).subscribe({
+    this.plansApi.addExercise(
+      this.selectedPlan.id,
+      this.exerciseToAdd.externalId,
+      this.exerciseNote,
+      this.exerciseSets,
+      this.exerciseReps,
+      this.exerciseWeight
+    ).subscribe({
       next: (exercise) => {
         this.planExercises = [...this.planExercises, exercise];
         this.updatePlanCount(this.selectedPlan!.id, this.planExercises.length);
         this.exerciseToAdd = null;
         this.exerciseNote = '';
+        this.exerciseSets = null;
+        this.exerciseReps = null;
+        this.exerciseWeight = null;
         this.message = 'Übung zum Plan hinzugefügt.';
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Übung konnte nicht hinzugefügt werden.')
@@ -128,17 +147,27 @@ export class DashboardComponent {
   startEditingExercise(exercise: PlanExercise): void {
     this.editingExerciseId = exercise.id;
     this.editingNote = exercise.note || '';
+    this.editingSets = exercise.sets;
+    this.editingReps = exercise.reps;
+    this.editingWeight = exercise.weight;
   }
 
-  saveExerciseNote(exercise: PlanExercise): void {
+  saveExercise(exercise: PlanExercise): void {
     if (!this.selectedPlan) return;
-    this.plansApi.updateExercise(this.selectedPlan.id, exercise.id, this.editingNote).subscribe({
+    this.plansApi.updateExercise(
+      this.selectedPlan.id,
+      exercise.id,
+      this.editingNote,
+      this.editingSets,
+      this.editingReps,
+      this.editingWeight
+    ).subscribe({
       next: (updated) => {
         this.planExercises = this.planExercises.map((item) => item.id === updated.id ? updated : item);
         this.editingExerciseId = null;
-        this.message = 'Notiz gespeichert.';
+        this.message = 'Trainingsdaten gespeichert.';
       },
-      error: (error: unknown) => this.error = this.apiMessage(error, 'Notiz konnte nicht gespeichert werden.')
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsdaten konnten nicht gespeichert werden.')
     });
   }
 

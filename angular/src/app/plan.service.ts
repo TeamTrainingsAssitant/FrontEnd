@@ -32,13 +32,16 @@ export interface PlanExercise extends Exercise {
   id: number;
   position: number;
   note: string | null;
+  sets: number | null;
+  reps: number | null;
+  weight: number | null;
 }
 
 // GraphQL liefert IDs als Text, die Oberfläche rechnet mit Zahlen
 type WithStringId<T> = Omit<T, 'id'> & { id: string };
 
 const PLAN_FIELDS = 'id name description updatedAt exerciseCount';
-const EXERCISE_FIELDS = 'id externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups position note';
+const EXERCISE_FIELDS = 'id externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups position note sets reps weight';
 const CATALOG_FIELDS = 'externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups bodyParts equipments';
 
 const toPlan = (plan: WithStringId<Plan>): Plan => ({ ...plan, id: Number(plan.id) });
@@ -97,24 +100,42 @@ export class PlanService {
       .pipe(map((data) => data.plan.exercises.map(toPlanExercise)));
   }
 
-  addExercise(planId: number, externalId: string, note: string): Observable<PlanExercise> {
+  addExercise(
+    planId: number,
+    externalId: string,
+    note: string,
+    sets: number | null,
+    reps: number | null,
+    weight: number | null
+  ): Observable<PlanExercise> {
     return this.graphql
       .request<{ addExerciseToPlan: WithStringId<PlanExercise> }>(
         `mutation ($planId: ID!, $input: AddPlanExerciseInput!) {
           addExerciseToPlan(planId: $planId, input: $input) { ${EXERCISE_FIELDS} }
         }`,
-        { planId: String(planId), input: { externalId, note: note || null } }
+        { planId: String(planId), input: { externalId, note: note || null, sets, reps, weight } }
       )
       .pipe(map((data) => toPlanExercise(data.addExerciseToPlan)));
   }
 
-  updateExercise(planId: number, exerciseId: number, note: string): Observable<PlanExercise> {
+  updateExercise(
+    planId: number,
+    exerciseId: number,
+    note: string,
+    sets: number | null,
+    reps: number | null,
+    weight: number | null
+  ): Observable<PlanExercise> {
     return this.graphql
       .request<{ updatePlanExercise: WithStringId<PlanExercise> }>(
         `mutation ($planId: ID!, $planExerciseId: ID!, $input: UpdatePlanExerciseInput!) {
           updatePlanExercise(planId: $planId, planExerciseId: $planExerciseId, input: $input) { ${EXERCISE_FIELDS} }
         }`,
-        { planId: String(planId), planExerciseId: String(exerciseId), input: { note: note || null } }
+        {
+          planId: String(planId),
+          planExerciseId: String(exerciseId),
+          input: { note: note || null, sets, reps, weight }
+        }
       )
       .pipe(map((data) => toPlanExercise(data.updatePlanExercise)));
   }

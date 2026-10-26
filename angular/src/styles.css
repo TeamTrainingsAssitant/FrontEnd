@@ -239,10 +239,23 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 .exercise-search input, .exercise-search select { min-width: 0; }
 .exercise-search button { min-width: 112px; }
 
+.training-editor { width: 100%; }
+.training-editor .muted { margin-bottom: 0; }
+.training-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.training-fields label span { color: var(--muted); font-size: .73rem; font-weight: 500; }
+.training-fields.compact { width: 100%; grid-template-columns: 1fr; }
+.training-metrics { display: grid; width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.training-metrics div { display: grid; min-width: 0; gap: 6px; padding: 12px 10px; border: 1px solid var(--border); border-radius: var(--radius-small); background: rgb(7 10 15 / 45%); }
+.training-metrics span { color: var(--muted); font-size: .7rem; }
+.training-metrics strong { overflow-wrap: anywhere; color: var(--accent-bright); font-size: .95rem; }
+.exercise-note { width: 100%; min-height: 24px; margin: 0; }
+.editor-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
 @media (max-width: 760px) {
   .exercise-search { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .exercise-search input { grid-column: 1 / -1; }
   .exercise-search button { grid-column: 1 / -1; }
+  .training-fields:not(.compact) { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 520px) {

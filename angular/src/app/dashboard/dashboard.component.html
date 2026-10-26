@@ -43,23 +43,48 @@
   </section>
   <section *ngIf="view === 'plans' && selectedPlan">
     <p class="eyebrow">ÜBUNGEN IM PLAN</p><h1>{{ selectedPlan.name }}</h1>
-    <div class="feature" *ngIf="exerciseToAdd">
+    <form class="feature training-editor" *ngIf="exerciseToAdd" (ngSubmit)="addExercise()">
       <h2>{{ exerciseToAdd.name }} hinzufügen</h2>
-      <label>Notiz (optional) <input [(ngModel)]="exerciseNote" maxlength="500"></label>
-      <button type="button" (click)="addExercise()">Zum Plan hinzufügen</button>
-      <button type="button" class="link-button" (click)="exerciseToAdd = null">Abbrechen</button>
-    </div>
+      <p class="muted">Leere Trainingswerte bleiben offen und können später ergänzt werden.</p>
+      <div class="training-fields">
+        <label>Sätze <span>1–20</span><input type="number" name="exerciseSets" [(ngModel)]="exerciseSets" min="1" max="20" step="1" placeholder="z. B. 3"></label>
+        <label>Wiederholungen <span>1–100</span><input type="number" name="exerciseReps" [(ngModel)]="exerciseReps" min="1" max="100" step="1" placeholder="z. B. 10"></label>
+        <label>Gewicht in kg <span>0–1000</span><input type="number" name="exerciseWeight" [(ngModel)]="exerciseWeight" min="0" max="1000" step="any" placeholder="z. B. 60"></label>
+      </div>
+      <label>Notiz (optional) <input name="exerciseNote" [(ngModel)]="exerciseNote" maxlength="500" placeholder="z. B. kontrollierte Ausführung"></label>
+      <div class="editor-actions">
+        <button type="submit">Zum Plan hinzufügen</button>
+        <button type="button" class="link-button" (click)="exerciseToAdd = null">Abbrechen</button>
+      </div>
+    </form>
     <div class="plan-exercises">
       <article class="exercise" *ngFor="let exercise of planExercises">
         <img *ngIf="exercise.gifUrl" [src]="exercise.gifUrl" [alt]="exercise.name" loading="lazy">
         <h2>{{ exercise.position }}. {{ exercise.name }}</h2>
         <p>{{ exercise.primaryMuscleGroups.join(' · ') }}</p>
-        <ng-container *ngIf="editingExerciseId === exercise.id; else noteText">
-          <input [(ngModel)]="editingNote" maxlength="500" aria-label="Notiz bearbeiten">
-          <button type="button" (click)="saveExerciseNote(exercise)">Speichern</button>
-          <button type="button" class="link-button" (click)="editingExerciseId = null">Abbrechen</button>
+        <ng-container *ngIf="editingExerciseId === exercise.id; else exerciseSummary">
+          <form class="exercise-editor-form" (ngSubmit)="saveExercise(exercise)">
+            <div class="training-fields compact">
+              <label>Sätze <span>1–20</span><input type="number" name="editingSets" [(ngModel)]="editingSets" min="1" max="20" step="1" placeholder="Nicht festgelegt"></label>
+              <label>Wiederholungen <span>1–100</span><input type="number" name="editingReps" [(ngModel)]="editingReps" min="1" max="100" step="1" placeholder="Nicht festgelegt"></label>
+              <label>Gewicht in kg <span>0–1000</span><input type="number" name="editingWeight" [(ngModel)]="editingWeight" min="0" max="1000" step="any" placeholder="Nicht festgelegt"></label>
+            </div>
+            <label>Notiz (optional) <input name="editingNote" [(ngModel)]="editingNote" maxlength="500" aria-label="Notiz bearbeiten"></label>
+            <div class="editor-actions">
+              <button type="submit">Speichern</button>
+              <button type="button" class="link-button" (click)="editingExerciseId = null">Abbrechen</button>
+            </div>
+          </form>
         </ng-container>
-        <ng-template #noteText><p class="muted">{{ exercise.note || 'Keine Notiz' }}</p><button type="button" (click)="startEditingExercise(exercise)">Notiz bearbeiten</button></ng-template>
+        <ng-template #exerciseSummary>
+          <div class="training-metrics">
+            <div><span>Sätze</span><strong>{{ exercise.sets ?? '–' }}</strong></div>
+            <div><span>Wiederholungen</span><strong>{{ exercise.reps ?? '–' }}</strong></div>
+            <div><span>Gewicht</span><strong>{{ exercise.weight === null ? '–' : exercise.weight + ' kg' }}</strong></div>
+          </div>
+          <p class="muted exercise-note">{{ exercise.note || 'Keine Notiz' }}</p>
+          <button type="button" (click)="startEditingExercise(exercise)">Trainingsdaten bearbeiten</button>
+        </ng-template>
         <button type="button" class="danger" (click)="deleteExercise(exercise)">Entfernen</button>
       </article>
       <p class="muted" *ngIf="!planExercises.length">Noch keine Übungen im Plan. Wähle im Bereich „Übungen“ eine Übung aus.</p>
