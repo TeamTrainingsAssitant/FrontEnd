@@ -13,6 +13,11 @@ npm start
 Danach ist die SPA unter `http://localhost:4200` verfügbar. Das Backend wird
 unter `https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1` erwartet.
 
+Trainingspläne, Planübungen und die Übungssuche laufen über das GraphQL-Gateway
+(Repo `GRAPHQL`, `PlanService` und `GraphqlService`). Login, Registrierung und Logout
+bleiben REST. Die Gateway-Adresse steht in `angular/src/app/config.ts`; lokal wird
+`http://localhost:4000/graphql` verwendet (Gateway mit `npm run dev` starten).
+
 ## Zwei Prüfungs-Touchpoints
 
 Die Angular-SPA unter [`angular`](./angular) ist die zentrale Single-Page-Anwendung
