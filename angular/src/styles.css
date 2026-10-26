@@ -269,3 +269,10 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 
 /* Alternativen im Übungs-Dialog */
 .alternatives-toggle { width: 100%; margin: 16px 0 10px; color: var(--text); background: var(--surface-raised); box-shadow: none; }
+
+/* Statistiken im Profil */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stats-grid div { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-small); background: var(--surface-raised); }
+.stats-grid .wide { grid-column: 1 / -1; }
+.stats-grid strong { color: var(--accent-bright); font-size: 1.6rem; line-height: 1; }
+.stats-grid span { color: var(--muted); font-size: .8rem; }

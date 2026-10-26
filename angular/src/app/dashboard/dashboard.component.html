@@ -1,7 +1,7 @@
 <header class="topbar">
   <strong class="brand">Capsule Gym <small>Training</small></strong>
   <div class="account">
-    <button class="link-button" type="button" (click)="profileOpen = !profileOpen" [attr.aria-expanded]="profileOpen">{{ user?.username }}</button>
+    <button class="link-button" type="button" (click)="openProfile()">{{ user?.username }}</button>
     <button class="link-button" type="button" (click)="logout()">Abmelden</button>
   </div>
 </header>
@@ -140,6 +140,16 @@
 <div class="dialog-backdrop" *ngIf="profileOpen">
   <section class="dialog profile-dialog" role="dialog" aria-modal="true" aria-label="Mein Profil">
     <h2>{{ user?.username }}</h2><p class="muted">{{ user?.email }}</p>
+
+    <!-- Statistiken über alle Pläne (F13) -->
+    <div class="stats-grid">
+      <div><strong>{{ stats.plans }}</strong><span>Trainingspläne</span></div>
+      <div><strong>{{ stats.exercises }}</strong><span>Übungen</span></div>
+      <div><strong>{{ stats.sets }}</strong><span>Sätze gesamt</span></div>
+      <div><strong>{{ stats.reps }}</strong><span>Wiederholungen gesamt</span></div>
+      <div class="wide"><strong>{{ stats.volume }} kg</strong><span>Gesamtgewicht (Gewicht × Sätze × Wiederholungen)</span></div>
+    </div>
+
     <button type="button" (click)="exportUserData()">Meine Daten exportieren</button>
     <label>Konto löschen: Passwort bestätigen <input type="password" [(ngModel)]="deletePassword"></label>
     <button type="button" class="danger" *ngIf="!confirmAccountDelete" [disabled]="!deletePassword" (click)="confirmAccountDelete = true">Konto dauerhaft löschen</button>
