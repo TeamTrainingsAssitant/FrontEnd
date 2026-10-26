@@ -14,10 +14,15 @@ export interface User {
   createdAt: string;
 }
 
+export interface UserExport {
+  user: User;
+  plans: unknown[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1';
+  private readonly api = 'https://trainingsapp-dd913c63a7fd.herokuapp.com/api/v1';
   readonly localAdminToken = 'local-admin';
 
   login(email: string, password: string): Observable<LoginResponse> {
@@ -32,6 +37,12 @@ export class AuthService {
 
   currentUser(): Observable<User> {
     return this.http.get<User>(`${this.api}/users/me`);
+  }
+  exportUserData(): Observable<UserExport> {
+    return this.http.get<UserExport>(`${this.api}/users/me/export`);
+  }
+  deleteAccount(password: string): Observable<unknown> {
+    return this.http.delete(`${this.api}/users/me`, { body: { password } });
   }
 
   logout(): Observable<unknown> {
