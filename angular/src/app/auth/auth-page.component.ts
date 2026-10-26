@@ -39,10 +39,6 @@ export class AuthPageComponent {
     const { email, password } = this.loginForm.getRawValue();
     if (this.loginForm.invalid) return;
     this.error = '';
-    if (this.auth.localAdmin(email, password)) {
-      this.router.navigateByUrl('/');
-      return;
-    }
     this.auth.login(email, password).subscribe({
       next: () => this.router.navigateByUrl('/'),
       error: (error: unknown) => this.error = this.apiMessage(error, 'Login fehlgeschlagen.')

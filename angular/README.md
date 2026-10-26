@@ -10,7 +10,6 @@ npm start
 Die Anwendung ist anschließend unter `http://localhost:4200` erreichbar. Das Backend wird für Registrierung,
 Login und Planverwaltung unter
 `https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1` angesprochen.
-Der lokale Fallback-Admin funktioniert auch ohne Backend mit `admin` / `admin123`.
 
 Die bisherige statische Homepage ist nicht die Angular-SPA. Für die Abgabe sollte die Anwendung aus diesem
 Verzeichnis gebaut und bereitgestellt werden:

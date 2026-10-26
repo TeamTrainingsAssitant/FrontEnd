@@ -1,8 +1,3 @@
-const API_BASE_URL = (window.API_BASE_URL || "https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1").replace(/\/$/, "");
-const LOCAL_ADMIN_EMAIL = "admin";
-const LOCAL_ADMIN_PASSWORD = "admin123";
-const LOCAL_ADMIN_TOKEN = "local-admin";
-
 function translateApiError(message) {
   return {
     "Email or password invalid.": "E-Mail oder Passwort ist ungültig.",
@@ -21,7 +16,7 @@ async function requestJson(endpoint, options = {}) {
     ...fetchOptions,
     headers: {
       "Content-Type": "application/json",
-      ...(token && token !== LOCAL_ADMIN_TOKEN ? { Authorization: `Bearer ${token}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers
     }
   });
@@ -54,13 +49,6 @@ if (loginForm) {
       return;
     }
 
-    if (email === LOCAL_ADMIN_EMAIL && password === LOCAL_ADMIN_PASSWORD) {
-      sessionStorage.setItem("powerLevelUser", LOCAL_ADMIN_EMAIL);
-      sessionStorage.setItem("powerLevelToken", LOCAL_ADMIN_TOKEN);
-      window.location.href = "Homepage.html";
-      return;
-    }
-
     message.textContent = "Anmeldung läuft …";
     try {
       const result = await requestJson("/auth", {
@@ -72,7 +60,7 @@ if (loginForm) {
       window.location.href = "Homepage.html";
     } catch (error) {
       message.textContent = error.message === "Failed to fetch"
-        ? "Backend nicht erreichbar. Bitte Backend starten oder den lokalen Admin verwenden."
+        ? "Backend nicht erreichbar. Bitte später erneut versuchen."
         : (error.message || "Login fehlgeschlagen.");
     }
   });

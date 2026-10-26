@@ -1,6 +1,5 @@
-const MPA_API = (window.API_BASE_URL || "https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1").replace(/\/$/, "");
+const MPA_API = API_BASE_URL;
 const MPA_TOKEN_KEY = "powerLevelToken";
-const MPA_LOCAL_TOKEN = "local-admin";
 
 function mpaEscape(value) {
   return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -10,8 +9,8 @@ function mpaEscape(value) {
 
 async function mpaRequest(path) {
   const token = sessionStorage.getItem(MPA_TOKEN_KEY);
-  if (!token || token === MPA_LOCAL_TOKEN) {
-    throw new Error("Bitte über die MPA anmelden. Der lokale Demo-Admin hat keinen Backend-Zugriff.");
+  if (!token) {
+    throw new Error("Bitte zuerst anmelden.");
   }
   const response = await fetch(`${MPA_API}${path}`, {
     headers: { Authorization: `Bearer ${token}` }
