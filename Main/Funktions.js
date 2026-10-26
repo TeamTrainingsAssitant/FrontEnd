@@ -1,4 +1,4 @@
-const API_BASE_URL = (window.API_BASE_URL || "https://trainingsplan-backend-6a384026392a.herokuapp.com/").replace(/\/$/, "");
+const API_BASE_URL = (window.API_BASE_URL || "https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1").replace(/\/$/, "");
 const LOCAL_ADMIN_EMAIL = "admin";
 const LOCAL_ADMIN_PASSWORD = "admin123";
 const LOCAL_ADMIN_TOKEN = "local-admin";
