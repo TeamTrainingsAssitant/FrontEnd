@@ -167,6 +167,13 @@
       <div><strong>{{ stats.reps }}</strong><span>Wiederholungen gesamt</span></div>
       <div><strong>{{ stats.volume }} kg</strong><span>Gesamtgewicht (Gewicht × Sätze × Wdh.)</span></div>
     </div>
+
+    <!-- Muskel-Heatmap: je kräftiger die Farbe, desto mehr wird der Muskel trainiert -->
+    <h3>Trainierte Muskeln</h3>
+    <div class="heatmap">
+      <span *ngFor="let item of heatmap" class="heat level-{{ item.level }}">{{ item.muscle }}</span>
+    </div>
+    <p class="muted" *ngIf="!heatmap.length">Noch keine Übungen im Plan.</p>
     <div class="editor-actions">
       <button type="button" class="link-button" (click)="statsPlan = null">Schließen</button>
     </div>

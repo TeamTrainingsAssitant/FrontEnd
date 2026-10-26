@@ -277,3 +277,11 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 .stats-grid span { color: var(--muted); font-size: .8rem; }
 .plan-title { min-height: 0; padding: 0; border: 0; color: var(--text); text-align: left; background: none; box-shadow: none; font: inherit; }
 .plan-title:hover:not(:disabled) { color: var(--accent-bright); background: none; box-shadow: none; text-decoration: underline; }
+
+/* Muskel-Heatmap: 4 Stufen von hellem Orange bis kräftigem Rot */
+.heatmap { display: flex; flex-wrap: wrap; gap: 8px; }
+.heat { padding: 8px 12px; border-radius: 999px; color: #1a0d07; font-size: .85rem; font-weight: 700; }
+.level-1 { background: #ffd2a8; }
+.level-2 { background: #ffa463; }
+.level-3 { background: #f2683a; }
+.level-4 { background: #d63a2a; color: #fff; }

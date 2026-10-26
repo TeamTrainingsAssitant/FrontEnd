@@ -21,6 +21,8 @@ export class DashboardComponent {
   // Plan, dessen Statistik gerade angezeigt wird
   statsPlan: Plan | null = null;
   stats = { exercises: 0, sets: 0, reps: 0, volume: 0 };
+  // Heatmap: Punkte je Muskel (primär 2, sekundär 1) und Farbstufe 1 bis 4
+  heatmap: { muscle: string; score: number; level: number }[] = [];
   plans: Plan[] = [];
   // Übungen je Plan für die Spalten im Board
   columnExercises: Record<number, PlanExercise[]> = {};
@@ -152,7 +154,21 @@ export class DashboardComponent {
       this.stats.reps += sets * reps;
       this.stats.volume += sets * reps * weight;
     }
+    this.heatmap = this.buildHeatmap(this.columnExercises[plan.id] || []);
     this.statsPlan = plan;
+  }
+
+  // Zählt, wie stark jeder Muskel im Plan trainiert wird
+  buildHeatmap(exercises: PlanExercise[]): { muscle: string; score: number; level: number }[] {
+    const scores: Record<string, number> = {};
+    for (const exercise of exercises) {
+      for (const muscle of exercise.primaryMuscleGroups) scores[muscle] = (scores[muscle] || 0) + 2;
+      for (const muscle of exercise.secondaryMuscleGroups) scores[muscle] = (scores[muscle] || 0) + 1;
+    }
+    const max = Math.max(1, ...Object.values(scores));
+    return Object.keys(scores)
+      .map((muscle) => ({ muscle, score: scores[muscle], level: Math.ceil(scores[muscle] / max * 4) }))
+      .sort((a, b) => b.score - a.score);
   }
 
   // Kurzinfo unter einer Übung, z. B. "60 kg · 3 × 10"
