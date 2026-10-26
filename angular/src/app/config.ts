@@ -1,7 +1,10 @@
 const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-// Adresse des GraphQL-Gateways (Repo GRAPHQL). Lokal läuft es mit "npm run dev" auf Port 4000.
-// TODO: Heroku-Adresse eintragen, sobald das Gateway deployt ist.
+// Zentrale Adressen. Nur hier ändern.
+// GraphQL-Gateway (Repo GRAPHQL). Lokal läuft es mit "npm run dev" auf Port 4000.
 export const GRAPHQL_URL = isLocal
   ? 'http://localhost:4000/graphql'
-  : 'https://trainingsplan-graphql-542db877a167.herokuapp.com/';
+  : 'https://trainingsplan-graphql-542db877a167.herokuapp.com/graphql';
+
+// REST-Backend (Repo BackEnd)
+export const API_URL = 'https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1';

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { API_URL } from './config';
 
 export interface LoginResponse {
   message: string;
@@ -22,8 +23,7 @@ export interface UserExport {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1';
-  readonly localAdminToken = 'local-admin';
+  private readonly api = API_URL;
 
   login(email: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.api}/auth`, { email, password }).pipe(
@@ -47,7 +47,7 @@ export class AuthService {
 
   logout(): Observable<unknown> {
     const token = this.token;
-    if (!token || token === this.localAdminToken) {
+    if (!token) {
       this.clearSession();
       return new Observable((subscriber) => {
         subscriber.next(null);
@@ -62,12 +62,6 @@ export class AuthService {
   storeSession(user: string, token: string): void {
     sessionStorage.setItem('powerLevelUser', user);
     sessionStorage.setItem('powerLevelToken', token);
-  }
-
-  localAdmin(email: string, password: string): boolean {
-    if (email !== 'admin' || password !== 'admin123') return false;
-    this.storeSession('admin', this.localAdminToken);
-    return true;
   }
 
   clearSession(): void {

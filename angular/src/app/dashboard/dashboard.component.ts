@@ -53,10 +53,6 @@ export class DashboardComponent {
   }
 
   loadDashboard(): void {
-    if (this.auth.token === this.auth.localAdminToken) {
-      this.user = { userId: 0, username: 'admin', email: 'admin', createdAt: '' };
-      return;
-    }
     this.auth.currentUser().subscribe({
       next: (user) => this.user = user,
       error: (error: unknown) => this.error = this.apiMessage(error, 'Profil konnte nicht geladen werden.')

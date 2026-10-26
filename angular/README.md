@@ -11,7 +11,6 @@ Die Anwendung ist anschließend unter `http://localhost:4200` erreichbar. Das Ba
 und Login unter
 `https://trainingsplan-backend-6a384026392a.herokuapp.com/api/v1` angesprochen.
 Planverwaltung und Übungssuche laufen über das GraphQL-Gateway.
-Der lokale Fallback-Admin funktioniert auch ohne Backend mit `admin` / `admin123`.
 
 Für die Abgabe wird die Anwendung aus diesem Verzeichnis gebaut und bereitgestellt:
 
