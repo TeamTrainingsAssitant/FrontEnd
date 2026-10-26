@@ -4,11 +4,32 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { Router } from '@angular/router';
 import { AuthService, User } from '../auth.service';
 import { Exercise, Plan, PlanExercise, PlanService } from '../plan.service';
+import { BodyHeatmapComponent } from '../body-heatmap/body-heatmap.component';
+
+// Welcher ExerciseDB-Muskel zu welcher Fläche der Körperfigur gehört
+const MUSCLE_REGIONS: Record<string, string> = {
+  'deltoids': 'shoulders', 'rear deltoids': 'shoulders', 'rotator cuff': 'shoulders',
+  'pectorals': 'chest', 'serratus anterior': 'chest',
+  'biceps': 'biceps', 'brachialis': 'biceps',
+  'triceps': 'triceps',
+  'forearms': 'forearms', 'wrist flexors': 'forearms', 'wrist extensors': 'forearms',
+  'grip muscles': 'forearms', 'wrists': 'forearms', 'hands': 'forearms',
+  'abdominals': 'abs', 'core': 'abs', 'obliques': 'abs', 'hip flexors': 'abs',
+  'trapezius': 'traps', 'levator scapulae': 'traps', 'sternocleidomastoid': 'traps',
+  'upper back': 'traps', 'rhomboids': 'traps',
+  'latissimus dorsi': 'lats', 'back': 'lats',
+  'erector spinae': 'lowerBack',
+  'glutes': 'glutes', 'abductors': 'glutes',
+  'quadriceps': 'quads', 'adductors': 'quads',
+  'hamstrings': 'hamstrings',
+  'calves': 'calves', 'soleus': 'calves', 'tibialis anterior': 'calves',
+  'ankles': 'calves', 'ankle stabilizers': 'calves', 'feet': 'calves'
+};
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, BodyHeatmapComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent {
@@ -21,8 +42,8 @@ export class DashboardComponent {
   // Plan, dessen Statistik gerade angezeigt wird
   statsPlan: Plan | null = null;
   stats = { exercises: 0, sets: 0, reps: 0, volume: 0 };
-  // Heatmap: Punkte je Muskel (primär 2, sekundär 1) und Farbstufe 1 bis 4
-  heatmap: { muscle: string; score: number; level: number }[] = [];
+  // Heatmap: Farbstufe 0 bis 4 je Körperregion
+  heatmap: Record<string, number> = {};
   plans: Plan[] = [];
   // Übungen je Plan für die Spalten im Board
   columnExercises: Record<number, PlanExercise[]> = {};
@@ -158,17 +179,23 @@ export class DashboardComponent {
     this.statsPlan = plan;
   }
 
-  // Zählt, wie stark jeder Muskel im Plan trainiert wird
-  buildHeatmap(exercises: PlanExercise[]): { muscle: string; score: number; level: number }[] {
+  // Zählt, wie stark jede Körperregion im Plan trainiert wird (primärer Muskel 2 Punkte, sekundärer 1 Punkt)
+  buildHeatmap(exercises: PlanExercise[]): Record<string, number> {
     const scores: Record<string, number> = {};
     for (const exercise of exercises) {
-      for (const muscle of exercise.primaryMuscleGroups) scores[muscle] = (scores[muscle] || 0) + 2;
-      for (const muscle of exercise.secondaryMuscleGroups) scores[muscle] = (scores[muscle] || 0) + 1;
+      for (const muscle of exercise.primaryMuscleGroups) this.addScore(scores, muscle, 2);
+      for (const muscle of exercise.secondaryMuscleGroups) this.addScore(scores, muscle, 1);
     }
+    // Punkte in Farbstufen 1 bis 4 umrechnen, die stärkste Region bekommt 4
     const max = Math.max(1, ...Object.values(scores));
-    return Object.keys(scores)
-      .map((muscle) => ({ muscle, score: scores[muscle], level: Math.ceil(scores[muscle] / max * 4) }))
-      .sort((a, b) => b.score - a.score);
+    const levels: Record<string, number> = {};
+    for (const region of Object.keys(scores)) levels[region] = Math.ceil(scores[region] / max * 4);
+    return levels;
+  }
+
+  private addScore(scores: Record<string, number>, muscle: string, points: number): void {
+    const region = MUSCLE_REGIONS[muscle.toLowerCase()];
+    if (region) scores[region] = (scores[region] || 0) + points;
   }
 
   // Kurzinfo unter einer Übung, z. B. "60 kg · 3 × 10"

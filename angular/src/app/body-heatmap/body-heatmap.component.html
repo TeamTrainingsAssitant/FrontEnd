@@ -1,0 +1,42 @@
+<svg class="body-heatmap" viewBox="0 0 240 215" role="img" aria-label="Trainierte Muskeln, Vorder- und Rückansicht">
+  <!-- Vorderansicht -->
+  <g>
+    <circle class="body-base" cx="50" cy="16" r="11" />
+    <rect class="body-base" x="45" y="27" width="10" height="7" />
+    <ellipse [attr.class]="heat('shoulders')" cx="29" cy="42" rx="9" ry="7" />
+    <ellipse [attr.class]="heat('shoulders')" cx="71" cy="42" rx="9" ry="7" />
+    <rect [attr.class]="heat('chest')" x="34" y="36" width="15" height="22" rx="5" />
+    <rect [attr.class]="heat('chest')" x="51" y="36" width="15" height="22" rx="5" />
+    <rect [attr.class]="heat('abs')" x="38" y="60" width="24" height="34" rx="5" />
+    <rect [attr.class]="heat('biceps')" x="19" y="51" width="9" height="24" rx="4" />
+    <rect [attr.class]="heat('biceps')" x="72" y="51" width="9" height="24" rx="4" />
+    <rect [attr.class]="heat('forearms')" x="15" y="77" width="9" height="28" rx="4" />
+    <rect [attr.class]="heat('forearms')" x="76" y="77" width="9" height="28" rx="4" />
+    <rect class="body-base" x="36" y="96" width="28" height="10" rx="3" />
+    <rect [attr.class]="heat('quads')" x="35" y="108" width="14" height="48" rx="6" />
+    <rect [attr.class]="heat('quads')" x="51" y="108" width="14" height="48" rx="6" />
+    <rect [attr.class]="heat('calves')" x="36" y="159" width="12" height="40" rx="5" />
+    <rect [attr.class]="heat('calves')" x="52" y="159" width="12" height="40" rx="5" />
+    <text x="50" y="212">Vorne</text>
+  </g>
+
+  <!-- Rückansicht -->
+  <g transform="translate(140 0)">
+    <circle class="body-base" cx="50" cy="16" r="11" />
+    <rect [attr.class]="heat('traps')" x="38" y="28" width="24" height="14" rx="5" />
+    <ellipse [attr.class]="heat('shoulders')" cx="29" cy="42" rx="9" ry="7" />
+    <ellipse [attr.class]="heat('shoulders')" cx="71" cy="42" rx="9" ry="7" />
+    <rect [attr.class]="heat('lats')" x="34" y="44" width="32" height="30" rx="6" />
+    <rect [attr.class]="heat('lowerBack')" x="40" y="76" width="20" height="18" rx="4" />
+    <rect [attr.class]="heat('triceps')" x="19" y="51" width="9" height="24" rx="4" />
+    <rect [attr.class]="heat('triceps')" x="72" y="51" width="9" height="24" rx="4" />
+    <rect [attr.class]="heat('forearms')" x="15" y="77" width="9" height="28" rx="4" />
+    <rect [attr.class]="heat('forearms')" x="76" y="77" width="9" height="28" rx="4" />
+    <rect [attr.class]="heat('glutes')" x="35" y="96" width="30" height="18" rx="8" />
+    <rect [attr.class]="heat('hamstrings')" x="35" y="116" width="14" height="40" rx="6" />
+    <rect [attr.class]="heat('hamstrings')" x="51" y="116" width="14" height="40" rx="6" />
+    <rect [attr.class]="heat('calves')" x="36" y="159" width="12" height="40" rx="5" />
+    <rect [attr.class]="heat('calves')" x="52" y="159" width="12" height="40" rx="5" />
+    <text x="50" y="212">Hinten</text>
+  </g>
+</svg>
