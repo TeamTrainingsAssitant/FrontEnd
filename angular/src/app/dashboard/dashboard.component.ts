@@ -33,30 +33,18 @@ export class DashboardComponent {
   exercises: Exercise[] = [];
   exerciseSearch = '';
   selectedMuscle = '';
-  selectedBodyPart = '';
   muscles: string[] = [];
-  bodyParts: string[] = [];
   exercisesLoading = false;
   selectedPlan: Plan | null = null;
-  planExercises: PlanExercise[] = [];
   removingExercise: PlanExercise | null = null;
   alternativeExercises: Exercise[] = [];
   alternativesLoading = false;
   alternativeActionLoading = false;
   alternativesError = '';
-  exerciseToAdd: Exercise | null = null;
-  exerciseNote = '';
-  exerciseSets: number | null = null;
-  exerciseReps: number | null = null;
-  exerciseWeight: number | null = null;
-  editingExerciseId: number | null = null;
   editingNote = '';
   editingSets: number | null = null;
   editingReps: number | null = null;
   editingWeight: number | null = null;
-  editingPlan: Plan | null = null;
-  editPlanName = '';
-  editPlanDescription = '';
   deletePassword = '';
 
   readonly planForm = this.fb.nonNullable.group({
@@ -134,14 +122,12 @@ export class DashboardComponent {
 
   openExercise(plan: Plan, exercise: PlanExercise): void {
     this.selectedPlan = plan;
-    this.planExercises = this.columnExercises[plan.id];
     this.startEditingExercise(exercise);
     this.dialogExercise = exercise;
   }
 
   closeDialog(): void {
     this.dialogExercise = null;
-    this.editingExerciseId = null;
     this.cancelExerciseRemoval();
   }
 
@@ -153,80 +139,7 @@ export class DashboardComponent {
     return parts.join(' · ');
   }
 
-  selectPlan(plan: Plan): void {
-    this.cancelExerciseRemoval();
-    this.plansApi.get(plan.id).subscribe({
-      next: (loadedPlan) => this.selectedPlan = { ...loadedPlan, exerciseCount: plan.exerciseCount },
-      error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht geladen werden.')
-    });
-    this.selectedPlan = plan;
-    this.planExercises = [];
-    this.error = '';
-    this.plansApi.listExercises(plan.id).subscribe({
-      next: (exercises) => this.planExercises = exercises,
-      error: (error: unknown) => this.error = this.apiMessage(error, 'Planübungen konnten nicht geladen werden.')
-    });
-  }
-
-  startEditingPlan(plan: Plan): void {
-    this.editingPlan = plan;
-    this.editPlanName = plan.name;
-    this.editPlanDescription = plan.description || '';
-  }
-
-  savePlan(): void {
-    if (!this.editingPlan || !this.editPlanName.trim()) return;
-    this.plansApi.update(this.editingPlan.id, this.editPlanName.trim(), this.editPlanDescription.trim()).subscribe({
-      next: (updated) => {
-        const plan = { ...updated, exerciseCount: this.editingPlan!.exerciseCount };
-        this.plans = this.plans.map((item) => item.id === plan.id ? plan : item);
-        if (this.selectedPlan?.id === plan.id) this.selectedPlan = plan;
-        this.editingPlan = null;
-        this.message = 'Trainingsplan aktualisiert.';
-      },
-      error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht aktualisiert werden.')
-    });
-  }
-
-  chooseExercise(exercise: Exercise): void {
-    this.exerciseToAdd = exercise;
-    this.exerciseNote = '';
-    this.exerciseSets = null;
-    this.exerciseReps = null;
-    this.exerciseWeight = null;
-  }
-
-  selectPlanById(planId: string): void {
-    const plan = this.plans.find((item) => item.id === Number(planId));
-    if (plan) this.selectPlan(plan);
-  }
-
-  addExercise(): void {
-    if (!this.selectedPlan || !this.exerciseToAdd) return;
-    this.plansApi.addExercise(
-      this.selectedPlan.id,
-      this.exerciseToAdd.externalId,
-      this.exerciseNote,
-      this.exerciseSets,
-      this.exerciseReps,
-      this.exerciseWeight
-    ).subscribe({
-      next: (exercise) => {
-        this.planExercises = [...this.planExercises, exercise];
-        this.updatePlanCount(this.selectedPlan!.id, this.planExercises.length);
-        this.exerciseToAdd = null;
-        this.exerciseNote = '';
-        this.exerciseSets = null;
-        this.exerciseReps = null;
-        this.exerciseWeight = null;
-        this.message = 'Übung zum Plan hinzugefügt.';
-      },
-      error: (error: unknown) => this.error = this.apiMessage(error, 'Übung konnte nicht hinzugefügt werden.')
-    });
-  }
-
   startEditingExercise(exercise: PlanExercise): void {
-    this.editingExerciseId = exercise.id;
     this.editingNote = exercise.note || '';
     this.editingSets = exercise.sets;
     this.editingReps = exercise.reps;
@@ -286,10 +199,7 @@ export class DashboardComponent {
     this.alternativeActionLoading = true;
     this.plansApi.deleteExercise(this.selectedPlan.id, exercise.id).subscribe({
       next: () => {
-        this.planExercises = this.planExercises
-          .filter((item) => item.id !== exercise.id)
-          .map((item, index) => ({ ...item, position: index + 1 }));
-        this.updatePlanCount(this.selectedPlan!.id, this.planExercises.length);
+        this.updatePlanCount(this.selectedPlan!.id, this.selectedPlan!.exerciseCount - 1);
         this.loadColumn(this.selectedPlan!.id);
         this.closeDialog();
         this.message = 'Übung aus dem Plan entfernt.';
@@ -362,9 +272,7 @@ export class DashboardComponent {
     const muscles = this.selectedMuscle ? [this.selectedMuscle] : [];
     this.plansApi.searchExercises(this.exerciseSearch, muscles).subscribe({
       next: (result) => {
-        this.exercises = this.selectedBodyPart
-          ? result.exercises.filter((exercise) => exercise.bodyParts?.includes(this.selectedBodyPart))
-          : result.exercises;
+        this.exercises = result.exercises;
         this.exercisesLoading = false;
       },
       error: (error: unknown) => {
@@ -378,10 +286,6 @@ export class DashboardComponent {
     this.plansApi.muscles().subscribe({
       next: (muscles) => this.muscles = muscles,
       error: (error: unknown) => this.error = this.apiMessage(error, 'Muskelgruppen konnten nicht geladen werden.')
-    });
-    this.plansApi.bodyParts().subscribe({
-      next: (bodyParts) => this.bodyParts = bodyParts,
-      error: (error: unknown) => this.error = this.apiMessage(error, 'Körperbereiche konnten nicht geladen werden.')
     });
   }
 
