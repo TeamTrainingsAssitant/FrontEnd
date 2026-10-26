@@ -9,7 +9,6 @@
 <main class="app-main">
   <p class="error" *ngIf="error">{{ error }}</p>
 
-
   <div class="planner">
     <aside class="rail" aria-label="Übungen">
       <h2>Übungen</h2>
@@ -47,9 +46,14 @@
                  (dragover)="$event.preventDefault()" (drop)="dropOnPlan(plan)">
           <header class="plan-column-head">
             <h2><button class="plan-title" type="button" title="Statistik anzeigen" (click)="openPlanStats(plan)">{{ plan.name }}</button></h2>
-            <button class="icon-button" type="button" title="Umbenennen" (click)="renamePlan(plan)">✎</button>
+            <button class="icon-button" type="button" title="Umbenennen" (click)="startRename(plan)">✎</button>
             <button class="icon-button" type="button" title="Löschen" (click)="planToDelete = plan">×</button>
           </header>
+          <form class="rename-form" *ngIf="planToRename === plan" (ngSubmit)="renamePlan(plan)">
+            <input name="renameValue" [(ngModel)]="renameValue" maxlength="60" aria-label="Neuer Name">
+            <button type="submit">Speichern</button>
+            <button type="button" class="link-button" (click)="planToRename = null">Abbrechen</button>
+          </form>
           <div class="delete-confirm" *ngIf="planToDelete === plan">
             <p>„{{ plan.name }}“ wirklich löschen?</p>
             <button type="button" class="danger" (click)="deletePlan(plan)">Löschen</button>
@@ -122,7 +126,7 @@
     <div *ngIf="showAlternatives">
       <p class="muted" *ngIf="alternativesLoading">Alternativen werden gesucht …</p>
       <p class="muted" *ngIf="!alternativesLoading && !alternativeExercises.length">Keine Alternativen gefunden.</p>
-      <ul class="rail-list">
+      <ul class="alternatives-list">
         <li class="column-card" *ngFor="let alternative of alternativeExercises">
           <img *ngIf="alternative.gifUrl" [src]="alternative.gifUrl" alt="" loading="lazy">
           <div>

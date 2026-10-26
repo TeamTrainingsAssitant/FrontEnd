@@ -55,6 +55,9 @@ export class DashboardComponent {
   draggedExercise: Exercise | null = null;
   // Plan, bei dem gerade die Lösch-Rückfrage angezeigt wird
   planToDelete: Plan | null = null;
+  // Plan, der gerade umbenannt wird, und der neue Name aus dem Eingabefeld
+  planToRename: Plan | null = null;
+  renameValue = '';
   user: User | null = null;
   error = '';
   exercises: Exercise[] = [];
@@ -114,11 +117,19 @@ export class DashboardComponent {
     });
   }
 
+  startRename(plan: Plan): void {
+    this.planToRename = plan;
+    this.renameValue = plan.name;
+  }
+
   renamePlan(plan: Plan): void {
-    const name = prompt('Neuer Name für den Trainingsplan:', plan.name);
-    if (!name || !name.trim()) return;
-    this.plansApi.update(plan.id, name.trim(), plan.description || '').subscribe({
-      next: () => this.loadPlans(),
+    const name = this.renameValue.trim();
+    if (!name) return;
+    this.plansApi.update(plan.id, name, plan.description || '').subscribe({
+      next: () => {
+        this.planToRename = null;
+        this.loadPlans();
+      },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht umbenannt werden.')
     });
   }

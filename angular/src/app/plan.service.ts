@@ -10,22 +10,12 @@ export interface Plan {
   exerciseCount: number;
 }
 
-export interface PlanDetails {
-  id: number;
-  name: string;
-  description: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface Exercise {
   externalId: string;
   name: string;
   gifUrl: string | null;
   primaryMuscleGroups: string[];
   secondaryMuscleGroups: string[];
-  bodyParts?: string[];
-  equipments?: string[];
 }
 
 export interface PlanExercise extends Exercise {
@@ -42,7 +32,7 @@ type WithStringId<T> = Omit<T, 'id'> & { id: string };
 
 const PLAN_FIELDS = 'id name description updatedAt exerciseCount';
 const EXERCISE_FIELDS = 'id externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups position note sets reps weight';
-const CATALOG_FIELDS = 'externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups bodyParts equipments';
+const CATALOG_FIELDS = 'externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups';
 
 const toPlan = (plan: WithStringId<Plan>): Plan => ({ ...plan, id: Number(plan.id) });
 const toPlanExercise = (exercise: WithStringId<PlanExercise>): PlanExercise => ({ ...exercise, id: Number(exercise.id) });
@@ -64,15 +54,6 @@ export class PlanService {
         { input: { name, description } }
       )
       .pipe(map((data) => toPlan(data.createPlan)));
-  }
-
-  get(id: number): Observable<PlanDetails> {
-    return this.graphql
-      .request<{ plan: WithStringId<PlanDetails> }>(
-        'query ($id: ID!) { plan(id: $id) { id name description createdAt updatedAt } }',
-        { id: String(id) }
-      )
-      .pipe(map((data) => ({ ...data.plan, id: Number(data.plan.id) })));
   }
 
   update(id: number, name: string, description: string): Observable<Plan> {
@@ -173,25 +154,21 @@ export class PlanService {
     );
   }
 
-  searchExercises(name = '', muscles: string[] = [], offset = 0): Observable<{ total: number; exercises: Exercise[] }> {
+  searchExercises(name = '', muscles: string[] = []): Observable<{ total: number; exercises: Exercise[] }> {
     return this.graphql
       .request<{ exercises: { total: number; exercises: Exercise[] } }>(
-        `query ($name: String, $muscles: [String!], $offset: Int, $limit: Int) {
-          exercises(name: $name, muscles: $muscles, offset: $offset, limit: $limit) {
+        `query ($name: String, $muscles: [String!], $limit: Int) {
+          exercises(name: $name, muscles: $muscles, limit: $limit) {
             total
             exercises { ${CATALOG_FIELDS} }
           }
         }`,
-        { name: name || null, muscles: muscles.length ? muscles : null, offset, limit: 20 }
+        { name: name || null, muscles: muscles.length ? muscles : null, limit: 20 }
       )
       .pipe(map((data) => data.exercises));
   }
 
   muscles(): Observable<string[]> {
     return this.graphql.request<{ muscles: string[] }>('{ muscles }').pipe(map((data) => data.muscles));
-  }
-
-  bodyParts(): Observable<string[]> {
-    return this.graphql.request<{ bodyParts: string[] }>('{ bodyParts }').pipe(map((data) => data.bodyParts));
   }
 }
