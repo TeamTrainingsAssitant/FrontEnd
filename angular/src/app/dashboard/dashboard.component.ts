@@ -5,8 +5,6 @@ import { Router } from '@angular/router';
 import { AuthService, User } from '../auth.service';
 import { Exercise, Plan, PlanExercise, PlanService } from '../plan.service';
 
-type View = 'overview' | 'plans' | 'create' | 'exercises' | 'profile';
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -19,8 +17,7 @@ export class DashboardComponent {
   private readonly auth = inject(AuthService);
   private readonly plansApi = inject(PlanService);
 
-  view: View = 'overview';
-  menuOpen = false;
+  profileOpen = false;
   plans: Plan[] = [];
   user: User | null = null;
   error = '';
@@ -256,7 +253,6 @@ export class DashboardComponent {
       next: (plan) => {
         this.plans = [plan, ...this.plans];
         this.planForm.reset({ name: '', description: 'Kraft' });
-        this.view = 'plans';
         this.message = 'Trainingsplan gespeichert.';
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht gespeichert werden.')
@@ -279,17 +275,6 @@ export class DashboardComponent {
         this.router.navigateByUrl('/auth');
       }
     });
-  }
-
-  selectView(view: View): void {
-    this.view = view;
-    this.menuOpen = false;
-    this.error = '';
-    this.message = '';
-    if (view === 'exercises' && !this.exercises.length) {
-      this.loadExerciseFilters();
-      this.loadExercises();
-    }
   }
 
   loadExercises(): void {
