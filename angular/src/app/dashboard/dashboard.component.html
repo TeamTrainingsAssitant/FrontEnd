@@ -8,7 +8,6 @@
 
 <main class="app-main">
   <p class="error" *ngIf="error">{{ error }}</p>
-  <p class="message" *ngIf="message">{{ message }}</p>
 
   <section class="feature" *ngIf="profileOpen">
     <h2>{{ user?.username }}</h2><p class="muted">{{ user?.email }}</p>
@@ -55,8 +54,13 @@
           <header class="plan-column-head">
             <h2>{{ plan.name }}</h2>
             <button class="icon-button" type="button" title="Umbenennen" (click)="renamePlan(plan)">✎</button>
-            <button class="icon-button" type="button" title="Löschen" (click)="deletePlan(plan)">×</button>
+            <button class="icon-button" type="button" title="Löschen" (click)="planToDelete = plan">×</button>
           </header>
+          <div class="delete-confirm" *ngIf="planToDelete === plan">
+            <p>„{{ plan.name }}“ wirklich löschen?</p>
+            <button type="button" class="danger" (click)="deletePlan(plan)">Löschen</button>
+            <button type="button" class="link-button" (click)="planToDelete = null">Abbrechen</button>
+          </div>
           <ol class="column-exercises">
             <li *ngFor="let exercise of columnExercises[plan.id]">
               <button class="column-card card-button" type="button" (click)="openExercise(plan, exercise)">

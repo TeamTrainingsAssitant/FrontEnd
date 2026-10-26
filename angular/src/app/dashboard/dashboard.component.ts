@@ -27,9 +27,10 @@ export class DashboardComponent {
   dialogExercise: PlanExercise | null = null;
   // Übung, die gerade aus der Übungsleiste gezogen wird
   draggedExercise: Exercise | null = null;
+  // Plan, bei dem gerade die Lösch-Rückfrage angezeigt wird
+  planToDelete: Plan | null = null;
   user: User | null = null;
   error = '';
-  message = '';
   exercises: Exercise[] = [];
   exerciseSearch = '';
   selectedMuscle = '';
@@ -114,7 +115,6 @@ export class DashboardComponent {
         this.loadColumn(planId);
         const plan = this.plans.find((item) => item.id === planId);
         if (plan) this.updatePlanCount(planId, plan.exerciseCount + 1);
-        this.message = exercise.name + ' hinzugefügt.';
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Übung konnte nicht hinzugefügt werden.')
     });
@@ -159,7 +159,6 @@ export class DashboardComponent {
       next: (updated) => {
         this.loadColumn(this.selectedPlan!.id);
         this.closeDialog();
-        this.message = 'Trainingsdaten gespeichert.';
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsdaten konnten nicht gespeichert werden.')
     });
@@ -202,7 +201,6 @@ export class DashboardComponent {
         this.updatePlanCount(this.selectedPlan!.id, this.selectedPlan!.exerciseCount - 1);
         this.loadColumn(this.selectedPlan!.id);
         this.closeDialog();
-        this.message = 'Übung aus dem Plan entfernt.';
       },
       error: (error: unknown) => {
         this.alternativeActionLoading = false;
@@ -216,10 +214,9 @@ export class DashboardComponent {
     const exercise = this.removingExercise;
     this.alternativeActionLoading = true;
     this.plansApi.replaceExercise(this.selectedPlan.id, exercise.id, alternative.externalId).subscribe({
-      next: (replacement) => {
+      next: () => {
         this.loadColumn(this.selectedPlan!.id);
         this.closeDialog();
-        this.message = `${exercise.name} wurde durch ${replacement.name} ersetzt.`;
       },
       error: (error: unknown) => {
         this.alternativeActionLoading = false;
@@ -243,16 +240,17 @@ export class DashboardComponent {
         this.plans = [plan, ...this.plans];
         this.columnExercises[plan.id] = [];
         this.planForm.reset({ name: '', description: 'Kraft' });
-        this.message = 'Trainingsplan gespeichert.';
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht gespeichert werden.')
     });
   }
 
   deletePlan(plan: Plan): void {
-    if (!confirm(`Möchtest du „${plan.name}“ wirklich löschen?`)) return;
     this.plansApi.delete(plan.id).subscribe({
-      next: () => this.plans = this.plans.filter((item) => item.id !== plan.id),
+      next: () => {
+        this.plans = this.plans.filter((item) => item.id !== plan.id);
+        this.planToDelete = null;
+      },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht gelöscht werden.')
     });
   }
@@ -299,7 +297,6 @@ export class DashboardComponent {
         link.download = 'capsule-gym-daten.json';
         link.click();
         URL.revokeObjectURL(url);
-        this.message = 'Deine Daten wurden exportiert.';
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Daten konnten nicht exportiert werden.')
     });
