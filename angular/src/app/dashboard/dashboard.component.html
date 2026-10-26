@@ -93,8 +93,7 @@
       </div>
     </div>
 
-    <!-- Normalfall: Werte bearbeiten -->
-    <form *ngIf="!removingExercise" (ngSubmit)="saveExercise(dialogExercise)">
+    <form (ngSubmit)="saveExercise(dialogExercise)">
       <div class="training-fields">
         <label>Gewicht (kg) <input type="number" name="weight" [(ngModel)]="editingWeight" min="0" max="1000" step="any"></label>
         <label>Sätze <input type="number" name="sets" [(ngModel)]="editingSets" min="1" max="20"></label>
@@ -102,28 +101,37 @@
       </div>
       <label>Notiz <textarea name="note" [(ngModel)]="editingNote" maxlength="500" placeholder="z. B. Sitzhöhe 4, Griff eng"></textarea></label>
       <div class="editor-actions">
-        <button type="button" class="danger" (click)="requestExerciseRemoval(dialogExercise)">Entfernen</button>
+        <button type="button" class="danger" (click)="confirmRemove = true">Entfernen</button>
         <button type="button" class="link-button" (click)="closeDialog()">Abbrechen</button>
         <button type="submit">Speichern</button>
       </div>
     </form>
 
-    <!-- Beim Entfernen: Alternativen anbieten (F14) -->
-    <div *ngIf="removingExercise">
-      <h3>Gerät belegt? Alternativen für {{ removingExercise.name }}</h3>
+    <p class="error" *ngIf="dialogError">{{ dialogError }}</p>
+
+    <div class="delete-confirm" *ngIf="confirmRemove">
+      <p>„{{ dialogExercise.name }}“ aus dem Plan entfernen?</p>
+      <button type="button" class="danger" (click)="removeExercise()">Ja, entfernen</button>
+      <button type="button" class="link-button" (click)="confirmRemove = false">Abbrechen</button>
+    </div>
+
+    <!-- Alternativen für die gleichen Muskeln (F14) -->
+    <button type="button" class="alternatives-toggle" (click)="toggleAlternatives()" [attr.aria-expanded]="showAlternatives">
+      Gerät belegt? Alternativen anzeigen {{ showAlternatives ? '▴' : '▾' }}
+    </button>
+    <div *ngIf="showAlternatives">
       <p class="muted" *ngIf="alternativesLoading">Alternativen werden gesucht …</p>
-      <p class="error" *ngIf="alternativesError">{{ alternativesError }}</p>
-      <div class="alternative-grid">
-        <article class="alternative-card" *ngFor="let alternative of alternativeExercises">
-          <img *ngIf="alternative.gifUrl" [src]="alternative.gifUrl" [alt]="alternative.name" loading="lazy">
-          <h3>{{ alternative.name }}</h3>
-          <button type="button" [disabled]="alternativeActionLoading" (click)="replaceExerciseWith(alternative)">Als Ersatz verwenden</button>
-        </article>
-      </div>
-      <div class="editor-actions">
-        <button type="button" class="danger" [disabled]="alternativeActionLoading" (click)="confirmExerciseRemoval()">Ohne Ersatz entfernen</button>
-        <button type="button" class="link-button" (click)="cancelExerciseRemoval()">Zurück</button>
-      </div>
+      <p class="muted" *ngIf="!alternativesLoading && !alternativeExercises.length">Keine Alternativen gefunden.</p>
+      <ul class="rail-list">
+        <li class="column-card" *ngFor="let alternative of alternativeExercises">
+          <img *ngIf="alternative.gifUrl" [src]="alternative.gifUrl" alt="" loading="lazy">
+          <div>
+            <strong>{{ alternative.name }}</strong>
+            <small>{{ alternative.primaryMuscleGroups.join(', ') }}</small>
+          </div>
+          <button type="button" class="link-button" (click)="replaceExerciseWith(alternative)">Ersetzen</button>
+        </li>
+      </ul>
     </div>
   </section>
 </div>

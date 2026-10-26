@@ -37,11 +37,12 @@ export class DashboardComponent {
   muscles: string[] = [];
   exercisesLoading = false;
   selectedPlan: Plan | null = null;
-  removingExercise: PlanExercise | null = null;
+  // Zustand im Übungs-Dialog
+  showAlternatives = false;
   alternativeExercises: Exercise[] = [];
   alternativesLoading = false;
-  alternativeActionLoading = false;
-  alternativesError = '';
+  confirmRemove = false;
+  dialogError = '';
   editingNote = '';
   editingSets: number | null = null;
   editingReps: number | null = null;
@@ -130,7 +131,10 @@ export class DashboardComponent {
 
   closeDialog(): void {
     this.dialogExercise = null;
-    this.cancelExerciseRemoval();
+    this.showAlternatives = false;
+    this.alternativeExercises = [];
+    this.confirmRemove = false;
+    this.dialogError = '';
   }
 
   // Kurzinfo unter einer Übung, z. B. "60 kg · 3 × 10"
@@ -166,64 +170,44 @@ export class DashboardComponent {
     });
   }
 
-  requestExerciseRemoval(exercise: PlanExercise): void {
-    if (!this.selectedPlan) return;
-    this.removingExercise = exercise;
-    this.alternativeExercises = [];
-    this.alternativesError = '';
+  // Klappt die Liste mit Übungen für die gleichen Muskeln auf oder zu
+  toggleAlternatives(): void {
+    this.showAlternatives = !this.showAlternatives;
+    if (!this.showAlternatives || !this.selectedPlan || !this.dialogExercise) return;
     this.alternativesLoading = true;
-    this.plansApi.alternatives(this.selectedPlan.id, exercise.id).subscribe({
+    this.plansApi.alternatives(this.selectedPlan.id, this.dialogExercise.id).subscribe({
       next: (alternatives) => {
-        if (this.removingExercise?.id !== exercise.id) return;
         this.alternativeExercises = alternatives;
         this.alternativesLoading = false;
       },
       error: (error: unknown) => {
-        if (this.removingExercise?.id !== exercise.id) return;
         this.alternativesLoading = false;
-        this.alternativesError = this.apiMessage(error, 'Alternativen konnten nicht geladen werden.');
+        this.dialogError = this.apiMessage(error, 'Alternativen konnten nicht geladen werden.');
       }
     });
   }
 
-  cancelExerciseRemoval(): void {
-    this.removingExercise = null;
-    this.alternativeExercises = [];
-    this.alternativesLoading = false;
-    this.alternativeActionLoading = false;
-    this.alternativesError = '';
-  }
-
-  confirmExerciseRemoval(): void {
-    if (!this.selectedPlan || !this.removingExercise) return;
-    const exercise = this.removingExercise;
-    this.alternativeActionLoading = true;
-    this.plansApi.deleteExercise(this.selectedPlan.id, exercise.id).subscribe({
+  removeExercise(): void {
+    if (!this.selectedPlan || !this.dialogExercise) return;
+    this.plansApi.deleteExercise(this.selectedPlan.id, this.dialogExercise.id).subscribe({
       next: () => {
         this.updatePlanCount(this.selectedPlan!.id, this.selectedPlan!.exerciseCount - 1);
         this.loadColumn(this.selectedPlan!.id);
         this.closeDialog();
       },
-      error: (error: unknown) => {
-        this.alternativeActionLoading = false;
-        this.alternativesError = this.apiMessage(error, 'Übung konnte nicht entfernt werden.');
-      }
+      error: (error: unknown) => this.dialogError = this.apiMessage(error, 'Übung konnte nicht entfernt werden.')
     });
   }
 
+  // Ersetzt die Übung im Plan, Gewicht, Sätze, Wiederholungen und Notiz bleiben erhalten
   replaceExerciseWith(alternative: Exercise): void {
-    if (!this.selectedPlan || !this.removingExercise) return;
-    const exercise = this.removingExercise;
-    this.alternativeActionLoading = true;
-    this.plansApi.replaceExercise(this.selectedPlan.id, exercise.id, alternative.externalId).subscribe({
+    if (!this.selectedPlan || !this.dialogExercise) return;
+    this.plansApi.replaceExercise(this.selectedPlan.id, this.dialogExercise.id, alternative.externalId).subscribe({
       next: () => {
         this.loadColumn(this.selectedPlan!.id);
         this.closeDialog();
       },
-      error: (error: unknown) => {
-        this.alternativeActionLoading = false;
-        this.alternativesError = this.apiMessage(error, 'Übung konnte nicht ersetzt werden.');
-      }
+      error: (error: unknown) => this.dialogError = this.apiMessage(error, 'Übung konnte nicht ersetzt werden.')
     });
   }
 
