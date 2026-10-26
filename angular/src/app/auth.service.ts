@@ -22,7 +22,7 @@ export interface UserExport {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'https://trainingsapp-dd913c63a7fd.herokuapp.com/api/v1';
+  private readonly api = 'https://trainingsplan-backend-6a384026392a.herokuapp.com/';
   readonly localAdminToken = 'local-admin';
 
   login(email: string, password: string): Observable<LoginResponse> {
