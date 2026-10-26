@@ -18,7 +18,7 @@
             "assets": [
               {
                 "glob": "Saiyan-Sans.ttf",
-                "input": "../Main",
+                "input": "src/assets/fonts",
                 "output": "assets/fonts"
               }
             ],
