@@ -21,7 +21,7 @@ export interface PlanDetails {
 export interface Exercise {
   externalId: string;
   name: string;
-  gifUrl: string;
+  gifUrl: string | null;
   primaryMuscleGroups: string[];
   secondaryMuscleGroups: string[];
   bodyParts?: string[];
@@ -138,6 +138,30 @@ export class PlanService {
         }
       )
       .pipe(map((data) => toPlanExercise(data.updatePlanExercise)));
+  }
+
+  alternatives(planId: number, exerciseId: number, limit = 5): Observable<Exercise[]> {
+    return this.graphql.request<{ alternativesForPlanExercise: Exercise[] }>(
+      `query ($planId: ID!, $planExerciseId: ID!, $limit: Int) {
+        alternativesForPlanExercise(planId: $planId, planExerciseId: $planExerciseId, limit: $limit) {
+          ${CATALOG_FIELDS}
+        }
+      }`,
+      { planId: String(planId), planExerciseId: String(exerciseId), limit }
+    ).pipe(map((data) => data.alternativesForPlanExercise));
+  }
+
+  replaceExercise(planId: number, exerciseId: number, externalId: string): Observable<PlanExercise> {
+    return this.graphql
+      .request<{ replacePlanExercise: WithStringId<PlanExercise> }>(
+        `mutation ($planId: ID!, $planExerciseId: ID!, $externalId: ID!) {
+          replacePlanExercise(planId: $planId, planExerciseId: $planExerciseId, externalId: $externalId) {
+            ${EXERCISE_FIELDS}
+          }
+        }`,
+        { planId: String(planId), planExerciseId: String(exerciseId), externalId }
+      )
+      .pipe(map((data) => toPlanExercise(data.replacePlanExercise)));
   }
 
   deleteExercise(planId: number, exerciseId: number): Observable<unknown> {

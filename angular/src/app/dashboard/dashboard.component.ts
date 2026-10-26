@@ -34,6 +34,11 @@ export class DashboardComponent {
   exercisesLoading = false;
   selectedPlan: Plan | null = null;
   planExercises: PlanExercise[] = [];
+  removingExercise: PlanExercise | null = null;
+  alternativeExercises: Exercise[] = [];
+  alternativesLoading = false;
+  alternativeActionLoading = false;
+  alternativesError = '';
   exerciseToAdd: Exercise | null = null;
   exerciseNote = '';
   exerciseSets: number | null = null;
@@ -74,6 +79,7 @@ export class DashboardComponent {
   }
 
   selectPlan(plan: Plan): void {
+    this.cancelExerciseRemoval();
     this.plansApi.get(plan.id).subscribe({
       next: (loadedPlan) => this.selectedPlan = { ...loadedPlan, exerciseCount: plan.exerciseCount },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht geladen werden.')
@@ -171,17 +177,68 @@ export class DashboardComponent {
     });
   }
 
-  deleteExercise(exercise: PlanExercise): void {
-    if (!this.selectedPlan || !confirm(`„${exercise.name}“ aus dem Plan entfernen?`)) return;
+  requestExerciseRemoval(exercise: PlanExercise): void {
+    if (!this.selectedPlan) return;
+    this.removingExercise = exercise;
+    this.alternativeExercises = [];
+    this.alternativesError = '';
+    this.alternativesLoading = true;
+    this.plansApi.alternatives(this.selectedPlan.id, exercise.id).subscribe({
+      next: (alternatives) => {
+        if (this.removingExercise?.id !== exercise.id) return;
+        this.alternativeExercises = alternatives;
+        this.alternativesLoading = false;
+      },
+      error: (error: unknown) => {
+        if (this.removingExercise?.id !== exercise.id) return;
+        this.alternativesLoading = false;
+        this.alternativesError = this.apiMessage(error, 'Alternativen konnten nicht geladen werden.');
+      }
+    });
+  }
+
+  cancelExerciseRemoval(): void {
+    this.removingExercise = null;
+    this.alternativeExercises = [];
+    this.alternativesLoading = false;
+    this.alternativeActionLoading = false;
+    this.alternativesError = '';
+  }
+
+  confirmExerciseRemoval(): void {
+    if (!this.selectedPlan || !this.removingExercise) return;
+    const exercise = this.removingExercise;
+    this.alternativeActionLoading = true;
     this.plansApi.deleteExercise(this.selectedPlan.id, exercise.id).subscribe({
       next: () => {
         this.planExercises = this.planExercises
           .filter((item) => item.id !== exercise.id)
           .map((item, index) => ({ ...item, position: index + 1 }));
         this.updatePlanCount(this.selectedPlan!.id, this.planExercises.length);
+        this.cancelExerciseRemoval();
         this.message = 'Übung aus dem Plan entfernt.';
       },
-      error: (error: unknown) => this.error = this.apiMessage(error, 'Übung konnte nicht entfernt werden.')
+      error: (error: unknown) => {
+        this.alternativeActionLoading = false;
+        this.alternativesError = this.apiMessage(error, 'Übung konnte nicht entfernt werden.');
+      }
+    });
+  }
+
+  replaceExerciseWith(alternative: Exercise): void {
+    if (!this.selectedPlan || !this.removingExercise) return;
+    const exercise = this.removingExercise;
+    this.alternativeActionLoading = true;
+    this.plansApi.replaceExercise(this.selectedPlan.id, exercise.id, alternative.externalId).subscribe({
+      next: (replacement) => {
+        this.planExercises = this.planExercises.map((item) => item.id === replacement.id ? replacement : item);
+        this.cancelExerciseRemoval();
+        this.message = `${exercise.name} wurde durch ${replacement.name} ersetzt.`;
+      },
+      error: (error: unknown) => {
+        this.alternativeActionLoading = false;
+        this.alternativesError = this.apiMessage(error, 'Übung konnte nicht ersetzt werden.');
+      }
     });
   }
 
@@ -295,7 +352,8 @@ export class DashboardComponent {
     const message = candidate.error?.message || candidate.message || fallback;
     return ({
       'Not authenticated.': 'Die Anmeldung ist abgelaufen. Bitte erneut einloggen.',
-      'Plan not found.': 'Trainingsplan nicht gefunden.'
+      'Plan not found.': 'Trainingsplan nicht gefunden.',
+      'ExerciseDB not reachable.': 'Der Übungskatalog ist gerade nicht verfügbar.'
     } as Record<string, string>)[message] || message;
   }
 }

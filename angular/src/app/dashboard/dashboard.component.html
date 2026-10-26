@@ -43,6 +43,31 @@
   </section>
   <section *ngIf="view === 'plans' && selectedPlan">
     <p class="eyebrow">ÜBUNGEN IM PLAN</p><h1>{{ selectedPlan.name }}</h1>
+    <div class="alternative-panel" *ngIf="removingExercise">
+      <div class="alternative-heading">
+        <div>
+          <p class="eyebrow">BEVOR DU ENTFERNST</p>
+          <h2 id="alternative-title">Alternativen für {{ removingExercise.name }}</h2>
+        </div>
+        <button type="button" class="link-button" aria-label="Alternativen schließen" [disabled]="alternativeActionLoading" (click)="cancelExerciseRemoval()">×</button>
+      </div>
+      <p class="muted">Vorschläge trainieren ähnliche Muskelgruppen. Beim Ersetzen bleiben Sätze, Wiederholungen, Gewicht und Notiz erhalten.</p>
+      <p class="muted" *ngIf="alternativesLoading" role="status">Passende Alternativen werden gesucht …</p>
+      <p class="error" *ngIf="alternativesError">{{ alternativesError }}</p>
+      <div class="alternative-grid" *ngIf="alternativeExercises.length">
+        <article class="alternative-card" *ngFor="let alternative of alternativeExercises">
+          <img *ngIf="alternative.gifUrl" [src]="alternative.gifUrl" [alt]="alternative.name" loading="lazy">
+          <h3>{{ alternative.name }}</h3>
+          <p>{{ alternative.primaryMuscleGroups.join(' · ') }}</p>
+          <button type="button" [disabled]="alternativeActionLoading" (click)="replaceExerciseWith(alternative)">{{ alternativeActionLoading ? 'Wird ersetzt …' : 'Als Ersatz verwenden' }}</button>
+        </article>
+      </div>
+      <p class="muted" *ngIf="!alternativesLoading && !alternativeExercises.length && !alternativesError">Keine passende Alternative gefunden. Du kannst die Übung trotzdem entfernen.</p>
+      <div class="editor-actions">
+        <button type="button" class="danger" [disabled]="alternativesLoading || alternativeActionLoading" (click)="confirmExerciseRemoval()">{{ alternativeActionLoading ? 'Wird entfernt …' : 'Ohne Ersatz entfernen' }}</button>
+        <button type="button" class="link-button" [disabled]="alternativeActionLoading" (click)="cancelExerciseRemoval()">Abbrechen</button>
+      </div>
+    </div>
     <form class="feature training-editor" *ngIf="exerciseToAdd" (ngSubmit)="addExercise()">
       <h2>{{ exerciseToAdd.name }} hinzufügen</h2>
       <p class="muted">Leere Trainingswerte bleiben offen und können später ergänzt werden.</p>
@@ -85,7 +110,7 @@
           <p class="muted exercise-note">{{ exercise.note || 'Keine Notiz' }}</p>
           <button type="button" (click)="startEditingExercise(exercise)">Trainingsdaten bearbeiten</button>
         </ng-template>
-        <button type="button" class="danger" (click)="deleteExercise(exercise)">Entfernen</button>
+        <button type="button" class="danger" (click)="requestExerciseRemoval(exercise)">Entfernen</button>
       </article>
       <p class="muted" *ngIf="!planExercises.length">Noch keine Übungen im Plan. Wähle im Bereich „Übungen“ eine Übung aus.</p>
     </div>
