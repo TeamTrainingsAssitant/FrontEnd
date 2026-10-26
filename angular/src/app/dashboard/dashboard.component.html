@@ -1,15 +1,15 @@
 <header class="topbar">
-  <button class="menu-button" type="button" (click)="menuOpen = !menuOpen">☰</button>
+  <button class="menu-button" type="button" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen" aria-controls="dashboard-menu" [attr.aria-label]="menuOpen ? 'Menü schließen' : 'Menü öffnen'">☰</button>
   <strong class="brand">Capsule Gym <small>Training</small></strong>
   <div class="account">{{ user?.username }} <button class="link-button" type="button" (click)="logout()">Abmelden</button></div>
 </header>
-<aside class="side-menu" [class.open]="menuOpen">
+<nav id="dashboard-menu" class="side-menu" [class.open]="menuOpen" [attr.aria-hidden]="!menuOpen" [attr.inert]="menuOpen ? null : ''" aria-label="Hauptnavigation">
   <button type="button" (click)="selectView('overview')">Übersicht</button>
   <button type="button" (click)="selectView('plans')">Trainingspläne</button>
   <button type="button" (click)="selectView('create')">Training erstellen</button>
   <button type="button" (click)="selectView('exercises')">Übungen</button>
   <button type="button" (click)="selectView('profile')">Mein Profil</button>
-</aside>
+</nav>
 <main class="app-main">
   <p class="error" *ngIf="error">{{ error }}</p>
   <p class="message" *ngIf="message">{{ message }}</p>
