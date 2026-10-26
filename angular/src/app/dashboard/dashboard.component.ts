@@ -23,6 +23,8 @@ export class DashboardComponent {
   columnExercises: Record<number, PlanExercise[]> = {};
   // Plan, in den der "+"-Button in der Übungsleiste eine Übung legt
   targetPlanId: number | null = null;
+  // Übung, deren Dialog gerade offen ist
+  dialogExercise: PlanExercise | null = null;
   user: User | null = null;
   error = '';
   message = '';
@@ -116,6 +118,19 @@ export class DashboardComponent {
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Übung konnte nicht hinzugefügt werden.')
     });
+  }
+
+  openExercise(plan: Plan, exercise: PlanExercise): void {
+    this.selectedPlan = plan;
+    this.planExercises = this.columnExercises[plan.id];
+    this.startEditingExercise(exercise);
+    this.dialogExercise = exercise;
+  }
+
+  closeDialog(): void {
+    this.dialogExercise = null;
+    this.editingExerciseId = null;
+    this.cancelExerciseRemoval();
   }
 
   // Kurzinfo unter einer Übung, z. B. "60 kg · 3 × 10"
@@ -217,8 +232,8 @@ export class DashboardComponent {
       this.editingWeight
     ).subscribe({
       next: (updated) => {
-        this.planExercises = this.planExercises.map((item) => item.id === updated.id ? updated : item);
-        this.editingExerciseId = null;
+        this.loadColumn(this.selectedPlan!.id);
+        this.closeDialog();
         this.message = 'Trainingsdaten gespeichert.';
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsdaten konnten nicht gespeichert werden.')
@@ -263,7 +278,8 @@ export class DashboardComponent {
           .filter((item) => item.id !== exercise.id)
           .map((item, index) => ({ ...item, position: index + 1 }));
         this.updatePlanCount(this.selectedPlan!.id, this.planExercises.length);
-        this.cancelExerciseRemoval();
+        this.loadColumn(this.selectedPlan!.id);
+        this.closeDialog();
         this.message = 'Übung aus dem Plan entfernt.';
       },
       error: (error: unknown) => {
@@ -279,8 +295,8 @@ export class DashboardComponent {
     this.alternativeActionLoading = true;
     this.plansApi.replaceExercise(this.selectedPlan.id, exercise.id, alternative.externalId).subscribe({
       next: (replacement) => {
-        this.planExercises = this.planExercises.map((item) => item.id === replacement.id ? replacement : item);
-        this.cancelExerciseRemoval();
+        this.loadColumn(this.selectedPlan!.id);
+        this.closeDialog();
         this.message = `${exercise.name} wurde durch ${replacement.name} ersetzt.`;
       },
       error: (error: unknown) => {

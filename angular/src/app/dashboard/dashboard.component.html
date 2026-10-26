@@ -56,12 +56,14 @@
             <button class="icon-button" type="button" title="Löschen" (click)="deletePlan(plan)">×</button>
           </header>
           <ol class="column-exercises">
-            <li class="column-card" *ngFor="let exercise of columnExercises[plan.id]">
-              <img *ngIf="exercise.gifUrl" [src]="exercise.gifUrl" alt="" loading="lazy">
-              <div>
-                <strong>{{ exercise.name }}</strong>
-                <small>{{ exerciseInfo(exercise) }}</small>
-              </div>
+            <li *ngFor="let exercise of columnExercises[plan.id]">
+              <button class="column-card card-button" type="button" (click)="openExercise(plan, exercise)">
+                <img *ngIf="exercise.gifUrl" [src]="exercise.gifUrl" alt="" loading="lazy">
+                <div>
+                  <strong>{{ exercise.name }}</strong>
+                  <small>{{ exerciseInfo(exercise) || 'Antippen, um Werte einzutragen' }}</small>
+                </div>
+              </button>
             </li>
             <li class="column-empty" *ngIf="!columnExercises[plan.id]?.length">Noch keine Übungen</li>
           </ol>
@@ -79,3 +81,49 @@
     </section>
   </div>
 </main>
+
+<!-- Übungs-Dialog -->
+<div class="dialog-backdrop" *ngIf="dialogExercise">
+  <section class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="dialogExercise.name">
+    <div class="dialog-head">
+      <img *ngIf="dialogExercise.gifUrl" [src]="dialogExercise.gifUrl" alt="">
+      <div>
+        <h2>{{ dialogExercise.name }}</h2>
+        <p class="muted">{{ dialogExercise.primaryMuscleGroups.join(', ') }} · {{ selectedPlan?.name }}</p>
+      </div>
+    </div>
+
+    <!-- Normalfall: Werte bearbeiten -->
+    <form *ngIf="!removingExercise" (ngSubmit)="saveExercise(dialogExercise)">
+      <div class="training-fields">
+        <label>Gewicht (kg) <input type="number" name="weight" [(ngModel)]="editingWeight" min="0" max="1000" step="any"></label>
+        <label>Sätze <input type="number" name="sets" [(ngModel)]="editingSets" min="1" max="20"></label>
+        <label>Wiederholungen <input type="number" name="reps" [(ngModel)]="editingReps" min="1" max="100"></label>
+      </div>
+      <label>Notiz <textarea name="note" [(ngModel)]="editingNote" maxlength="500" placeholder="z. B. Sitzhöhe 4, Griff eng"></textarea></label>
+      <div class="editor-actions">
+        <button type="button" class="danger" (click)="requestExerciseRemoval(dialogExercise)">Entfernen</button>
+        <button type="button" class="link-button" (click)="closeDialog()">Abbrechen</button>
+        <button type="submit">Speichern</button>
+      </div>
+    </form>
+
+    <!-- Beim Entfernen: Alternativen anbieten (F14) -->
+    <div *ngIf="removingExercise">
+      <h3>Gerät belegt? Alternativen für {{ removingExercise.name }}</h3>
+      <p class="muted" *ngIf="alternativesLoading">Alternativen werden gesucht …</p>
+      <p class="error" *ngIf="alternativesError">{{ alternativesError }}</p>
+      <div class="alternative-grid">
+        <article class="alternative-card" *ngFor="let alternative of alternativeExercises">
+          <img *ngIf="alternative.gifUrl" [src]="alternative.gifUrl" [alt]="alternative.name" loading="lazy">
+          <h3>{{ alternative.name }}</h3>
+          <button type="button" [disabled]="alternativeActionLoading" (click)="replaceExerciseWith(alternative)">Als Ersatz verwenden</button>
+        </article>
+      </div>
+      <div class="editor-actions">
+        <button type="button" class="danger" [disabled]="alternativeActionLoading" (click)="confirmExerciseRemoval()">Ohne Ersatz entfernen</button>
+        <button type="button" class="link-button" (click)="cancelExerciseRemoval()">Zurück</button>
+      </div>
+    </div>
+  </section>
+</div>

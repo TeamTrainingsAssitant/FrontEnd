@@ -322,3 +322,16 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 .rail { display: grid; gap: 12px; }
 .rail h2 { margin: 0; }
 .rail-list { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.card-button { width: 100%; min-height: 0; color: var(--text); text-align: left; box-shadow: none; font-weight: 400; }
+.card-button:hover:not(:disabled) { border-color: var(--accent); background: var(--surface-highlight); box-shadow: none; }
+.card-button small { color: var(--muted); }
+
+/* Übungs-Dialog */
+.dialog-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 16px; background: rgb(0 0 0 / 60%); }
+.dialog { width: min(100%, 520px); max-height: calc(100vh - 32px); overflow: auto; padding: 22px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-card); }
+.dialog-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.dialog-head img { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; background: #fff; }
+.dialog-head h2 { margin: 0; }
+.dialog-head p { margin: 4px 0 0; }
+.dialog textarea { width: 100%; min-height: 72px; padding: 10px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-small); color: var(--text); background: #0d121b; font: inherit; }
+.dialog .editor-actions button[type="submit"] { margin-left: auto; }
