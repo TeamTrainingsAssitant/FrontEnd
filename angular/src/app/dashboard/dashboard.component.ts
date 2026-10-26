@@ -21,6 +21,8 @@ export class DashboardComponent {
   plans: Plan[] = [];
   // Übungen je Plan für die Spalten im Board
   columnExercises: Record<number, PlanExercise[]> = {};
+  // Plan, in den der "+"-Button in der Übungsleiste eine Übung legt
+  targetPlanId: number | null = null;
   user: User | null = null;
   error = '';
   message = '';
@@ -68,6 +70,8 @@ export class DashboardComponent {
       error: (error: unknown) => this.error = this.apiMessage(error, 'Profil konnte nicht geladen werden.')
     });
     this.loadPlans();
+    this.loadExerciseFilters();
+    this.loadExercises();
   }
 
   loadPlans(): void {
@@ -75,6 +79,7 @@ export class DashboardComponent {
       next: (plans) => {
         this.plans = plans;
         plans.forEach((plan) => this.loadColumn(plan.id));
+        if (!this.targetPlanId && plans.length) this.targetPlanId = plans[0].id;
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingspläne konnten nicht geladen werden.')
     });
@@ -93,6 +98,23 @@ export class DashboardComponent {
     this.plansApi.update(plan.id, name.trim(), plan.description || '').subscribe({
       next: () => this.loadPlans(),
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht umbenannt werden.')
+    });
+  }
+
+  addToTargetPlan(exercise: Exercise): void {
+    if (!this.targetPlanId) {
+      this.error = 'Lege zuerst einen Trainingsplan an.';
+      return;
+    }
+    const planId = this.targetPlanId;
+    this.plansApi.addExercise(planId, exercise.externalId, '', null, null, null).subscribe({
+      next: () => {
+        this.loadColumn(planId);
+        const plan = this.plans.find((item) => item.id === planId);
+        if (plan) this.updatePlanCount(planId, plan.exerciseCount + 1);
+        this.message = exercise.name + ' hinzugefügt.';
+      },
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Übung konnte nicht hinzugefügt werden.')
     });
   }
 

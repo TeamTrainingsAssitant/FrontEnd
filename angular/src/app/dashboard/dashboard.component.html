@@ -20,7 +20,29 @@
   <div class="planner">
     <aside class="rail" aria-label="Übungen">
       <h2>Übungen</h2>
-      <p class="muted">Hier kommt der Übungskatalog hin (Schritt 3).</p>
+      <input [(ngModel)]="exerciseSearch" (keyup.enter)="loadExercises()" placeholder="Übung suchen" aria-label="Übung suchen">
+      <select [(ngModel)]="selectedMuscle" (change)="loadExercises()" aria-label="Muskelgruppe">
+        <option value="">Alle Muskelgruppen</option>
+        <option *ngFor="let muscle of muscles" [value]="muscle">{{ muscle }}</option>
+      </select>
+      <label>„+“ fügt hinzu zu
+        <select [(ngModel)]="targetPlanId">
+          <option *ngFor="let plan of plans" [ngValue]="plan.id">{{ plan.name }}</option>
+        </select>
+      </label>
+
+      <p class="muted" *ngIf="exercisesLoading">Übungen werden geladen …</p>
+      <ul class="rail-list">
+        <li class="column-card" *ngFor="let exercise of exercises">
+          <img [src]="exercise.gifUrl" alt="" loading="lazy">
+          <div>
+            <strong>{{ exercise.name }}</strong>
+            <small>{{ exercise.primaryMuscleGroups.join(', ') }}</small>
+          </div>
+          <button class="icon-button" type="button" [title]="exercise.name + ' hinzufügen'" (click)="addToTargetPlan(exercise)">+</button>
+        </li>
+      </ul>
+      <p class="muted" *ngIf="!exercisesLoading && !exercises.length">Keine Übungen gefunden.</p>
     </aside>
 
     <section>

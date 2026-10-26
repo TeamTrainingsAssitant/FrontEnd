@@ -308,7 +308,7 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 .icon-button { width: 36px; min-height: 36px; flex: none; padding: 0; color: var(--muted); background: transparent; box-shadow: none; font-size: 1.3rem; }
 .icon-button:hover:not(:disabled) { color: var(--text); background: var(--surface-highlight); box-shadow: none; }
 .column-exercises { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.column-card { display: grid; grid-template-columns: 48px 1fr; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-small); background: rgb(7 10 15 / 45%); }
+.column-card { display: grid; grid-template-columns: 48px 1fr auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-small); background: rgb(7 10 15 / 45%); }
 .column-card img { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; background: #fff; }
 .column-card div { display: grid; min-width: 0; }
 .column-card strong { overflow: hidden; font-size: .9rem; text-overflow: ellipsis; white-space: nowrap; }
@@ -319,3 +319,6 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
   .planner { grid-template-columns: 1fr; }
   .rail { position: static; max-height: none; }
 }
+.rail { display: grid; gap: 12px; }
+.rail h2 { margin: 0; }
+.rail-list { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
