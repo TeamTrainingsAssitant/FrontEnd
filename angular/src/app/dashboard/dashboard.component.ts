@@ -19,6 +19,8 @@ export class DashboardComponent {
 
   profileOpen = false;
   plans: Plan[] = [];
+  // Übungen je Plan für die Spalten im Board
+  columnExercises: Record<number, PlanExercise[]> = {};
   user: User | null = null;
   error = '';
   message = '';
@@ -70,9 +72,36 @@ export class DashboardComponent {
 
   loadPlans(): void {
     this.plansApi.list().subscribe({
-      next: (plans) => this.plans = plans,
+      next: (plans) => {
+        this.plans = plans;
+        plans.forEach((plan) => this.loadColumn(plan.id));
+      },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingspläne konnten nicht geladen werden.')
     });
+  }
+
+  loadColumn(planId: number): void {
+    this.plansApi.listExercises(planId).subscribe({
+      next: (exercises) => this.columnExercises[planId] = exercises,
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Planübungen konnten nicht geladen werden.')
+    });
+  }
+
+  renamePlan(plan: Plan): void {
+    const name = prompt('Neuer Name für den Trainingsplan:', plan.name);
+    if (!name || !name.trim()) return;
+    this.plansApi.update(plan.id, name.trim(), plan.description || '').subscribe({
+      next: () => this.loadPlans(),
+      error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht umbenannt werden.')
+    });
+  }
+
+  // Kurzinfo unter einer Übung, z. B. "60 kg · 3 × 10"
+  exerciseInfo(exercise: PlanExercise): string {
+    const parts: string[] = [];
+    if (exercise.weight !== null) parts.push(exercise.weight + ' kg');
+    if (exercise.sets && exercise.reps) parts.push(exercise.sets + ' × ' + exercise.reps);
+    return parts.join(' · ');
   }
 
   selectPlan(plan: Plan): void {
@@ -252,6 +281,7 @@ export class DashboardComponent {
     this.plansApi.create(values.name, values.description).subscribe({
       next: (plan) => {
         this.plans = [plan, ...this.plans];
+        this.columnExercises[plan.id] = [];
         this.planForm.reset({ name: '', description: 'Kraft' });
         this.message = 'Trainingsplan gespeichert.';
       },

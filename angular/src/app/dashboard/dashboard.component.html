@@ -28,11 +28,31 @@
       <h1>Trainingspläne</h1>
       <div class="board">
         <section class="plan-column" *ngFor="let plan of plans">
-          <header><h2>{{ plan.name }}</h2></header>
-          <p class="muted">Übungen folgen in Schritt 2.</p>
+          <header class="plan-column-head">
+            <h2>{{ plan.name }}</h2>
+            <button class="icon-button" type="button" title="Umbenennen" (click)="renamePlan(plan)">✎</button>
+            <button class="icon-button" type="button" title="Löschen" (click)="deletePlan(plan)">×</button>
+          </header>
+          <ol class="column-exercises">
+            <li class="column-card" *ngFor="let exercise of columnExercises[plan.id]">
+              <img *ngIf="exercise.gifUrl" [src]="exercise.gifUrl" alt="" loading="lazy">
+              <div>
+                <strong>{{ exercise.name }}</strong>
+                <small>{{ exerciseInfo(exercise) }}</small>
+              </div>
+            </li>
+            <li class="column-empty" *ngIf="!columnExercises[plan.id]?.length">Noch keine Übungen</li>
+          </ol>
           <footer><small>{{ plan.exerciseCount }} Übungen</small></footer>
         </section>
-        <div class="plan-column add-plan">+ Trainingsplan (Schritt 2)</div>
+
+        <form class="plan-column add-plan" [formGroup]="planForm" (ngSubmit)="createPlan()">
+          <label>Neuer Trainingsplan <input formControlName="name" maxlength="60" placeholder="z. B. Oberkörper"></label>
+          <label>Schwerpunkt
+            <select formControlName="description"><option>Kraft</option><option>Ausdauer</option><option>Beweglichkeit</option><option>Ganzkörper</option></select>
+          </label>
+          <button type="submit" [disabled]="planForm.invalid">+ Trainingsplan</button>
+        </form>
       </div>
     </section>
   </div>
