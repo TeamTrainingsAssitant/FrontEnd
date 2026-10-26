@@ -1,7 +1,7 @@
 <header class="topbar">
   <strong class="brand">Capsule Gym <small>Training</small></strong>
   <div class="account">
-    <button class="link-button" type="button" (click)="openProfile()">{{ user?.username }}</button>
+    <button class="link-button" type="button" (click)="profileOpen = true">{{ user?.username }}</button>
     <button class="link-button" type="button" (click)="logout()">Abmelden</button>
   </div>
 </header>
@@ -46,7 +46,7 @@
         <section class="plan-column" *ngFor="let plan of plans" [class.drop-target]="draggedExercise"
                  (dragover)="$event.preventDefault()" (drop)="dropOnPlan(plan)">
           <header class="plan-column-head">
-            <h2>{{ plan.name }}</h2>
+            <h2><button class="plan-title" type="button" title="Statistik anzeigen" (click)="openPlanStats(plan)">{{ plan.name }}</button></h2>
             <button class="icon-button" type="button" title="Umbenennen" (click)="renamePlan(plan)">✎</button>
             <button class="icon-button" type="button" title="Löschen" (click)="planToDelete = plan">×</button>
           </header>
@@ -141,14 +141,6 @@
   <section class="dialog profile-dialog" role="dialog" aria-modal="true" aria-label="Mein Profil">
     <h2>{{ user?.username }}</h2><p class="muted">{{ user?.email }}</p>
 
-    <!-- Statistiken über alle Pläne (F13) -->
-    <div class="stats-grid">
-      <div><strong>{{ stats.plans }}</strong><span>Trainingspläne</span></div>
-      <div><strong>{{ stats.exercises }}</strong><span>Übungen</span></div>
-      <div><strong>{{ stats.sets }}</strong><span>Sätze gesamt</span></div>
-      <div><strong>{{ stats.reps }}</strong><span>Wiederholungen gesamt</span></div>
-      <div class="wide"><strong>{{ stats.volume }} kg</strong><span>Gesamtgewicht (Gewicht × Sätze × Wiederholungen)</span></div>
-    </div>
 
     <button type="button" (click)="exportUserData()">Meine Daten exportieren</button>
     <label>Konto löschen: Passwort bestätigen <input type="password" [(ngModel)]="deletePassword"></label>
@@ -160,6 +152,23 @@
     </div>
     <div class="editor-actions">
       <button type="button" class="link-button" (click)="profileOpen = false; confirmAccountDelete = false">Schließen</button>
+    </div>
+  </section>
+</div>
+
+<!-- Statistik eines Plans (F13) -->
+<div class="dialog-backdrop" *ngIf="statsPlan">
+  <section class="dialog profile-dialog" role="dialog" aria-modal="true" [attr.aria-label]="'Statistik ' + statsPlan.name">
+    <h2>{{ statsPlan.name }}</h2>
+    <p class="muted">{{ statsPlan.description }}</p>
+    <div class="stats-grid">
+      <div><strong>{{ stats.exercises }}</strong><span>Übungen</span></div>
+      <div><strong>{{ stats.sets }}</strong><span>Sätze gesamt</span></div>
+      <div><strong>{{ stats.reps }}</strong><span>Wiederholungen gesamt</span></div>
+      <div><strong>{{ stats.volume }} kg</strong><span>Gesamtgewicht (Gewicht × Sätze × Wdh.)</span></div>
+    </div>
+    <div class="editor-actions">
+      <button type="button" class="link-button" (click)="statsPlan = null">Schließen</button>
     </div>
   </section>
 </div>

@@ -273,6 +273,7 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 /* Statistiken im Profil */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .stats-grid div { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-small); background: var(--surface-raised); }
-.stats-grid .wide { grid-column: 1 / -1; }
 .stats-grid strong { color: var(--accent-bright); font-size: 1.6rem; line-height: 1; }
 .stats-grid span { color: var(--muted); font-size: .8rem; }
+.plan-title { min-height: 0; padding: 0; border: 0; color: var(--text); text-align: left; background: none; box-shadow: none; font: inherit; }
+.plan-title:hover:not(:disabled) { color: var(--accent-bright); background: none; box-shadow: none; text-decoration: underline; }

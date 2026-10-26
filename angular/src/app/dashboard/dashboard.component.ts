@@ -18,8 +18,9 @@ export class DashboardComponent {
   private readonly plansApi = inject(PlanService);
 
   profileOpen = false;
-  // Statistiken im Profil, werden beim Öffnen berechnet
-  stats = { plans: 0, exercises: 0, sets: 0, reps: 0, volume: 0 };
+  // Plan, dessen Statistik gerade angezeigt wird
+  statsPlan: Plan | null = null;
+  stats = { exercises: 0, sets: 0, reps: 0, volume: 0 };
   plans: Plan[] = [];
   // Übungen je Plan für die Spalten im Board
   columnExercises: Record<number, PlanExercise[]> = {};
@@ -139,20 +140,19 @@ export class DashboardComponent {
     this.dialogError = '';
   }
 
-  openProfile(): void {
-    this.stats = { plans: this.plans.length, exercises: 0, sets: 0, reps: 0, volume: 0 };
-    for (const plan of this.plans) {
-      for (const exercise of this.columnExercises[plan.id] || []) {
-        const sets = exercise.sets || 0;
-        const reps = exercise.reps || 0;
-        const weight = exercise.weight || 0;
-        this.stats.exercises += 1;
-        this.stats.sets += sets;
-        this.stats.reps += sets * reps;
-        this.stats.volume += sets * reps * weight;
-      }
+  // Berechnet die Statistik eines Plans aus den geladenen Übungen
+  openPlanStats(plan: Plan): void {
+    this.stats = { exercises: 0, sets: 0, reps: 0, volume: 0 };
+    for (const exercise of this.columnExercises[plan.id] || []) {
+      const sets = exercise.sets || 0;
+      const reps = exercise.reps || 0;
+      const weight = exercise.weight || 0;
+      this.stats.exercises += 1;
+      this.stats.sets += sets;
+      this.stats.reps += sets * reps;
+      this.stats.volume += sets * reps * weight;
     }
-    this.profileOpen = true;
+    this.statsPlan = plan;
   }
 
   // Kurzinfo unter einer Übung, z. B. "60 kg · 3 × 10"
