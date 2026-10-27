@@ -145,6 +145,17 @@ export class PlanService {
       .pipe(map((data) => toPlanExercise(data.replacePlanExercise)));
   }
 
+  reorderExercises(planId: number, exerciseIds: number[]): Observable<PlanExercise[]> {
+    return this.graphql
+      .request<{ reorderPlanExercises: WithStringId<PlanExercise>[] }>(
+        `mutation ($planId: ID!, $planExerciseIds: [ID!]!) {
+          reorderPlanExercises(planId: $planId, planExerciseIds: $planExerciseIds) { ${EXERCISE_FIELDS} }
+        }`,
+        { planId: String(planId), planExerciseIds: exerciseIds.map(String) }
+      )
+      .pipe(map((data) => data.reorderPlanExercises.map(toPlanExercise)));
+  }
+
   deleteExercise(planId: number, exerciseId: number): Observable<unknown> {
     return this.graphql.request(
       `mutation ($planId: ID!, $planExerciseId: ID!) {
