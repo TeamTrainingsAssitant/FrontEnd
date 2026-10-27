@@ -60,11 +60,19 @@
             <button type="button" class="link-button" (click)="planToDelete = null">Abbrechen</button>
           </div>
           <ol class="column-exercises">
-            <li *ngFor="let exercise of columnExercises[plan.id]">
+            <li *ngFor="let exercise of columnExercises[plan.id]; let i = index; let last = last" class="reorder-item"
+                draggable="true"
+                [class.dragging]="draggedPlanExercise?.exercise?.id === exercise.id"
+                [class.drop-before]="showDropMarker(plan.id, i)"
+                [class.drop-after]="last && showDropMarker(plan.id, i + 1)"
+                (dragstart)="startReorder(plan.id, exercise, $event)"
+                (dragover)="reorderOver(plan.id, i, $event)"
+                (drop)="dropReorder(plan.id, $event)"
+                (dragend)="endReorder()">
               <button class="column-card card-button" type="button" (click)="openExercise(plan, exercise)">
                 <img *ngIf="exercise.gifUrl" [src]="exercise.gifUrl" alt="" loading="lazy">
                 <div>
-                  <strong>{{ exercise.name }}</strong>
+                  <strong>{{ i + 1 }}. {{ exercise.name }}</strong>
                   <small>{{ exerciseInfo(exercise) || 'Antippen, um Werte einzutragen' }}</small>
                 </div>
               </button>

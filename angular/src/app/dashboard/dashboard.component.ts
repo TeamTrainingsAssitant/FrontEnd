@@ -53,6 +53,9 @@ export class DashboardComponent {
   dialogExercise: PlanExercise | null = null;
   // Übung, die gerade aus der Übungsleiste gezogen wird
   draggedExercise: Exercise | null = null;
+  // Übung, die gerade innerhalb ihres Plans umsortiert wird, und die Einfügeposition
+  draggedPlanExercise: { planId: number; exercise: PlanExercise } | null = null;
+  dropIndex: number | null = null;
   // Plan, bei dem gerade die Lösch-Rückfrage angezeigt wird
   planToDelete: Plan | null = null;
   // Plan, der gerade umbenannt wird, und der neue Name aus dem Eingabefeld
@@ -147,6 +150,57 @@ export class DashboardComponent {
     if (!this.draggedExercise) return;
     this.addExerciseToPlan(plan.id, this.draggedExercise);
     this.draggedExercise = null;
+  }
+
+  // Drag & Drop innerhalb eines Plans: Reihenfolge der Übungen ändern
+  startReorder(planId: number, exercise: PlanExercise, event: DragEvent): void {
+    this.draggedPlanExercise = { planId, exercise };
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(exercise.id));
+    }
+  }
+
+  // Obere Kartenhälfte: davor einfügen, untere Hälfte: danach
+  reorderOver(planId: number, index: number, event: DragEvent): void {
+    if (this.draggedPlanExercise?.planId !== planId) return;
+    event.preventDefault();
+    const card = event.currentTarget as HTMLElement;
+    const rect = card.getBoundingClientRect();
+    this.dropIndex = event.clientY < rect.top + rect.height / 2 ? index : index + 1;
+  }
+
+  showDropMarker(planId: number, index: number): boolean {
+    return this.draggedPlanExercise?.planId === planId && this.dropIndex === index;
+  }
+
+  dropReorder(planId: number, event: DragEvent): void {
+    const dragged = this.draggedPlanExercise;
+    const insertAt = this.dropIndex;
+    if (!dragged || dragged.planId !== planId || insertAt === null) return;
+    event.preventDefault();
+    this.endReorder();
+
+    const previous = this.columnExercises[planId] ?? [];
+    const from = previous.findIndex((item) => item.id === dragged.exercise.id);
+    const target = insertAt > from ? insertAt - 1 : insertAt;
+    if (from < 0 || target === from) return;
+
+    const reordered = [...previous];
+    reordered.splice(target, 0, reordered.splice(from, 1)[0]);
+    this.columnExercises[planId] = reordered.map((item, index) => ({ ...item, position: index + 1 }));
+    this.plansApi.reorderExercises(planId, reordered.map((item) => item.id)).subscribe({
+      next: (saved) => this.columnExercises[planId] = saved,
+      error: (error: unknown) => {
+        this.columnExercises[planId] = previous;
+        this.error = this.apiMessage(error, 'Reihenfolge konnte nicht gespeichert werden.');
+      }
+    });
+  }
+
+  endReorder(): void {
+    this.draggedPlanExercise = null;
+    this.dropIndex = null;
   }
 
   addExerciseToPlan(planId: number, exercise: Exercise): void {

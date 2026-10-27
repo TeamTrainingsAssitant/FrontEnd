@@ -249,6 +249,10 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 /* Drag & Drop */
 .rail-list .column-card { cursor: grab; }
 .plan-column.drop-target { border-style: dashed; border-color: var(--accent); }
+.reorder-item { cursor: grab; border-radius: var(--radius-small); }
+.reorder-item.dragging { opacity: .4; }
+.reorder-item.drop-before { box-shadow: 0 -4px 0 -1px var(--accent); }
+.reorder-item.drop-after { box-shadow: 0 4px 0 -1px var(--accent); }
 
 /* Lösch-Rückfrage in der Plan-Spalte */
 .delete-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--danger); border-radius: var(--radius-small); }
