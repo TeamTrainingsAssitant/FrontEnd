@@ -29,6 +29,12 @@ Frontend: `http://localhost:5000/login`. Backend und GraphQL-Gateway müssen sep
 
 Das Heroku-Frontend-Root bleibt `FrontEnd`; die Procfile startet `npm start`. Das Build-Skript erzeugt zunächst den Angular-Build und anschließend wird der Node-Server gestartet. Standardmäßig nutzt der Proxy die bestehenden Heroku-Adressen. Abweichende Ziele können mit `BACKEND_BASE_URL` und `GRAPHQL_BASE_URL` gesetzt werden. Die Backend-URL ist die Origin ohne `/api/v1`.
 
+Öffentliche Frontend-Adresse: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com>
+
+- Login: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com/login>
+- Registrierung: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com/register>
+- Angular-SPA: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com/app/>
+
 ## Angular
 
 Der Angular-Build nutzt `/app/` als Base-Href. Die API-Konfiguration zeigt auf gleich-origin `/api/v1` und `/graphql`; damit bleibt die HttpOnly-Session bei Browseranfragen verfügbar.
