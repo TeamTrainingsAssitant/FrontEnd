@@ -37,6 +37,11 @@ form.addEventListener('submit', async (event) => {
       return;
     }
     await api('/auth', { method: 'POST', body: JSON.stringify({ email: values.email, password: values.password }) });
+    try {
+      await api('/users/me');
+    } catch {
+      throw new Error('Der Login war erfolgreich, aber das Backend hat keine gültige Sitzung gesetzt. Bitte das Backend deployen.');
+    }
     location.assign('/app/');
   } catch (error) {
     const text = error instanceof Error ? error.message : 'Die Anfrage ist fehlgeschlagen.';

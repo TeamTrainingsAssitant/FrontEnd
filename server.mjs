@@ -69,6 +69,18 @@ async function handleAuthForm(request, response, mode) {
     if (upstream.ok) {
       const headers = { Location: mode === 'login' ? '/app/' : '/login?registered=1' };
       const cookies = upstream.headers.getSetCookie();
+      if (mode === 'login') {
+        const cookieHeader = cookies.map((cookie) => cookie.split(';', 1)[0]).join('; ');
+        if (!cookieHeader) {
+          response.writeHead(303, { Location: '/login?error=' + encodeURIComponent('Das Backend hat keine Login-Sitzung gesetzt. Bitte das Backend deployen.') });
+          return response.end();
+        }
+        const sessionCheck = await fetch(`${backend}/api/v1/users/me`, { headers: { Cookie: cookieHeader, Accept: 'application/json' } });
+        if (!sessionCheck.ok) {
+          response.writeHead(303, { Location: '/login?error=' + encodeURIComponent('Das Backend hat keine gültige Login-Sitzung gesetzt. Bitte das Backend deployen.') });
+          return response.end();
+        }
+      }
       if (cookies.length) headers['Set-Cookie'] = cookies;
       response.writeHead(303, headers);
       return response.end();
