@@ -84,8 +84,7 @@ export class DashboardComponent {
   confirmAccountDelete = false;
 
   readonly planForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(60)]],
-    description: ['Kraft']
+    name: ['', [Validators.required, Validators.maxLength(60)]]
   });
 
   constructor() {
@@ -347,11 +346,11 @@ export class DashboardComponent {
   createPlan(): void {
     if (this.planForm.invalid) return;
     const values = this.planForm.getRawValue();
-    this.plansApi.create(values.name, values.description).subscribe({
+    this.plansApi.create(values.name, '').subscribe({
       next: (plan) => {
         this.plans = [plan, ...this.plans];
         this.columnExercises[plan.id] = [];
-        this.planForm.reset({ name: '', description: 'Kraft' });
+        this.planForm.reset({ name: '' });
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Trainingsplan konnte nicht gespeichert werden.')
     });

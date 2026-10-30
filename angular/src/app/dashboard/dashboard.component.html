@@ -84,9 +84,6 @@
 
         <form class="plan-column add-plan" [formGroup]="planForm" (ngSubmit)="createPlan()">
           <label>Neuer Trainingsplan <input formControlName="name" maxlength="60" placeholder="z. B. Oberkörper"></label>
-          <label>Schwerpunkt
-            <select formControlName="description"><option>Kraft</option><option>Ausdauer</option><option>Beweglichkeit</option><option>Ganzkörper</option></select>
-          </label>
           <button type="submit" [disabled]="planForm.invalid">+ Trainingsplan</button>
         </form>
       </div>
