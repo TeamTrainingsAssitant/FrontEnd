@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "npm --prefix angular ci --include=dev && npm --prefix angular run build",
+    "heroku-postbuild": "npm run build",
     "start": "node server.mjs"
   },
   "dependencies": {
