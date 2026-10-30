@@ -26,6 +26,17 @@ const MUSCLE_REGIONS: Record<string, string> = {
   'ankles': 'calves', 'ankle stabilizers': 'calves', 'feet': 'calves'
 };
 
+const MUSCLE_GROUP_DEFINITIONS = [
+  { label: 'Brust', names: ['chest', 'pectorals', 'serratus anterior'] },
+  { label: 'Rücken', names: ['back', 'upper back', 'lower back', 'latissimus dorsi', 'lats', 'trapezius', 'traps', 'rhomboids', 'levator scapulae', 'erector spinae'] },
+  { label: 'Schultern', names: ['shoulders', 'deltoids', 'rear deltoids', 'rotator cuff'] },
+  { label: 'Nacken', names: ['neck', 'sternocleidomastoid'] },
+  { label: 'Arme', names: ['upper arms', 'biceps', 'brachialis', 'triceps', 'forearms', 'wrist flexors', 'wrist extensors', 'grip muscles', 'wrists', 'hands'] },
+  { label: 'Bauch & Rumpf', names: ['abs', 'abdominals', 'core', 'obliques', 'hip flexors'] },
+  { label: 'Gesäß', names: ['glutes', 'abductors'] },
+  { label: 'Beine', names: ['upper legs', 'lower legs', 'quadriceps', 'quads', 'adductors', 'hamstrings', 'calves', 'soleus', 'tibialis anterior', 'ankles', 'ankle stabilizers', 'feet'] }
+];
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -66,7 +77,7 @@ export class DashboardComponent {
   exercises: Exercise[] = [];
   exerciseSearch = '';
   selectedMuscle = '';
-  muscles: string[] = [];
+  muscleGroups: { label: string; muscles: string[] }[] = [];
   exercisesLoading = false;
   selectedPlan: Plan | null = null;
   // Zustand im Übungs-Dialog
@@ -378,7 +389,7 @@ export class DashboardComponent {
 
   loadExercises(): void {
     this.exercisesLoading = true;
-    const muscles = this.selectedMuscle ? [this.selectedMuscle] : [];
+    const muscles = this.muscleGroups.find((group) => group.label === this.selectedMuscle)?.muscles ?? [];
     this.plansApi.searchExercises(this.exerciseSearch, muscles).subscribe({
       next: (result) => {
         this.exercises = result.exercises;
@@ -393,7 +404,20 @@ export class DashboardComponent {
 
   loadExerciseFilters(): void {
     this.plansApi.muscles().subscribe({
-      next: (muscles) => this.muscles = muscles,
+      next: (muscles) => {
+        const available = new Map<string, string>(muscles.map((muscle) => [muscle.toLowerCase(), muscle] as const));
+        const assigned = new Set<string>();
+        this.muscleGroups = MUSCLE_GROUP_DEFINITIONS.map((group) => {
+          const values = group.names
+            .map((name) => available.get(name))
+            .filter((muscle): muscle is string => Boolean(muscle));
+          values.forEach((muscle) => assigned.add(muscle.toLowerCase()));
+          return { label: group.label, muscles: values };
+        }).filter((group) => group.muscles.length > 0);
+
+        const otherMuscles = muscles.filter((muscle) => !assigned.has(muscle.toLowerCase()));
+        if (otherMuscles.length) this.muscleGroups.push({ label: 'Weitere Muskeln', muscles: otherMuscles });
+      },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Muskelgruppen konnten nicht geladen werden.')
     });
   }

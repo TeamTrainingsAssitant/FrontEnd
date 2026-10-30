@@ -15,7 +15,7 @@
       <input [(ngModel)]="exerciseSearch" (keyup.enter)="loadExercises()" placeholder="Übung suchen" aria-label="Übung suchen">
       <select [(ngModel)]="selectedMuscle" (change)="loadExercises()" aria-label="Muskelgruppe">
         <option value="">Alle Muskelgruppen</option>
-        <option *ngFor="let muscle of muscles" [value]="muscle">{{ muscle }}</option>
+        <option *ngFor="let group of muscleGroups" [value]="group.label">{{ group.label }}</option>
       </select>
       <label>„+“ fügt hinzu zu
         <select [(ngModel)]="targetPlanId">

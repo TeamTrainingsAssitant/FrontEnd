@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 import { GraphqlService } from './graphql.service';
 
 export interface Plan {
@@ -166,6 +166,20 @@ export class PlanService {
   }
 
   searchExercises(name = '', muscles: string[] = []): Observable<{ total: number; exercises: Exercise[] }> {
+    if (muscles.length > 1) {
+      return forkJoin(muscles.map((muscle) => this.searchExercisesForMuscles(name, [muscle], 50))).pipe(
+        map((results) => {
+          const unique = new Map<string, Exercise>();
+          results.forEach((result) => result.exercises.forEach((exercise) => unique.set(exercise.externalId, exercise)));
+          const exercises = [...unique.values()];
+          return { total: exercises.length, exercises: exercises.slice(0, 20) };
+        })
+      );
+    }
+    return this.searchExercisesForMuscles(name, muscles, 20);
+  }
+
+  private searchExercisesForMuscles(name: string, muscles: string[], limit: number): Observable<{ total: number; exercises: Exercise[] }> {
     return this.graphql
       .request<{ exercises: { total: number; exercises: Exercise[] } }>(
         `query ($name: String, $muscles: [String!], $limit: Int) {
@@ -174,7 +188,7 @@ export class PlanService {
             exercises { ${CATALOG_FIELDS} }
           }
         }`,
-        { name: name || null, muscles: muscles.length ? muscles : null, limit: 20 }
+        { name: name || null, muscles: muscles.length ? muscles : null, limit }
       )
       .pipe(map((data) => data.exercises));
   }
