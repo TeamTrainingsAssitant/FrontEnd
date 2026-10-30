@@ -251,8 +251,11 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 .set-check { width: 42px; min-height: 42px; padding: 0; border-color: #626b78; color: #f5f3ed; background: #626b78; box-shadow: none; font-size: 1.3rem; }
 .set-check:hover:not(:disabled) { background: #75808f; box-shadow: none; }
 .set-check.set-completed, .set-check.set-completed:hover:not(:disabled) { border-color: #248a54; color: #fff; background: #248a54; }
-.add-set-button { justify-self: start; min-height: 38px; border-color: var(--border-strong); color: var(--accent-bright); background: transparent; box-shadow: none; }
+.set-list-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.add-set-button, .remove-set-button { justify-self: start; min-height: 38px; border-color: var(--border-strong); color: var(--accent-bright); background: transparent; box-shadow: none; }
 .add-set-button:hover:not(:disabled) { background: var(--surface-highlight); box-shadow: none; }
+.remove-set-button { color: var(--muted); }
+.remove-set-button:hover:not(:disabled) { border-color: var(--danger); color: #ffb6bd; background: rgb(168 62 74 / 14%); box-shadow: none; }
 @media (max-width: 760px) {
   .set-row { grid-template-columns: 58px minmax(0, 1fr) minmax(0, 1fr) 42px; gap: 7px; }
 }

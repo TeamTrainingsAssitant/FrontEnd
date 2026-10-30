@@ -303,6 +303,11 @@ export class DashboardComponent {
     this.trainingSets = [...this.trainingSets, { weight: null, reps: null, completed: false }];
   }
 
+  removeLastTrainingSet(): void {
+    if (this.trainingSets.length <= 1) return;
+    this.trainingSets = this.trainingSets.slice(0, -1);
+  }
+
   saveExercise(exercise: PlanExercise): void {
     if (!this.selectedPlan) return;
     this.plansApi.updateExercise(
