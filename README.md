@@ -1,40 +1,86 @@
 # Capsule Gym Frontend
 
-Das Frontend liefert eine kleine MPA für Anmeldung und Registrierung sowie die Angular-SPA für den Trainingsbereich. Beide laufen auf derselben Origin:
+Benutzeroberfläche des TrainingsPlanAssistant: Trainingspläne anlegen, Übungen aus dem Katalog hinzufügen, Sätze erfassen und die trainierten Muskelgruppen auswerten.
 
-- `/login` – anmelden
-- `/register` – Konto erstellen
-- `/app/` – Angular-SPA (Anmeldung erforderlich)
+Live: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com>
+
+| Pfad | Inhalt | Technik |
+|---|---|---|
+| `/login` | Anmelden | MPA (`public/`) |
+| `/register` | Konto erstellen | MPA (`public/`) |
+| `/app/` | Trainingsbereich, Anmeldung erforderlich | Angular-SPA (`angular/`) |
+
+## Funktionen
+
+- Pläne anlegen, umbenennen und löschen
+- Übungen suchen, filtern und per Drag & Drop in Pläne ziehen oder dort umsortieren
+- Notiz, Gewicht, Wiederholungen und einzelne Sätze pro Übung speichern
+- Alternativen anzeigen, wenn ein Gerät belegt ist, und die Übung ersetzen
+- Muskel-Heatmap pro Plan
+- Datenexport und Kontolöschung
 
 ## Architektur
 
-`server.mjs` liefert die MPA und den Angular-Build aus. Außerdem leitet er `/api/v1/*` an das Spring-Backend und `/graphql` an das GraphQL-Gateway weiter. Der Browser kommuniziert dadurch nur mit der Frontend-Origin.
+```
+Browser ──▶ server.mjs ──┬── /login, /register ──▶ public/
+                         ├── /app/*            ──▶ Angular-Build
+                         ├── /api/v1/*         ──▶ Spring-Backend
+                         └── /graphql          ──▶ GraphQL-Gateway
+```
 
-Das Backend setzt beim Login ein `HttpOnly`, `SameSite=Lax` Cookie namens `capsule_session`. Der Token wird nicht im Browser-Storage abgelegt und nicht an JavaScript zurückgegeben. REST und GraphQL lesen die Session serverseitig aus dem Cookie. Logout widerruft den Token im Backend und löscht das Cookie.
+Der Browser spricht nur mit der Frontend-Origin. `server.mjs` liefert die Seiten aus und leitet API-Aufrufe weiter.
+
+Nach dem Login setzt `server.mjs` das Cookie `capsule_session` (`HttpOnly`, `SameSite=Lax`). JavaScript sieht den Token nicht, und er liegt nicht im Browser-Storage. Der Proxy wandelt das Cookie bei jeder Weiterleitung in den Header `Authorization: Bearer <token>` um. Logout macht den Token im Backend ungültig und löscht das Cookie.
+
+## Voraussetzungen
+
+- Node.js 24
+- Laufendes [Backend](../BackEnd) und [GraphQL-Gateway](../GRAPHQL), oder die Heroku-Instanzen (Standard, wenn keine Variablen gesetzt sind)
 
 ## Lokal starten
 
-In einem Terminal im Ordner `FrontEnd`:
+```bash
+npm install
+npm run build
+BACKEND_BASE_URL=http://localhost:8080 GRAPHQL_BASE_URL=http://localhost:4000 npm start
+```
+
+PowerShell:
 
 ```powershell
 $env:BACKEND_BASE_URL = "http://localhost:8080"
 $env:GRAPHQL_BASE_URL = "http://localhost:4000"
-npm run build
 npm start
 ```
 
-Frontend: `http://localhost:5000/login`. Backend und GraphQL-Gateway müssen separat laufen. Für die Angular-Entwicklung kann weiterhin `cd angular; npm start` genutzt werden; für den vollständigen MPA-/Cookiefluss den Frontend-Server verwenden.
+Danach ist die App unter <http://localhost:5000/login> erreichbar.
 
-## Heroku
+Für reine Oberflächenarbeit gibt es `cd angular && npm start`. Login und Cookie funktionieren vollständig aber nur über `server.mjs`.
 
-Das Heroku-Frontend-Root bleibt `FrontEnd`; die Procfile startet `npm start`. Das Build-Skript erzeugt zunächst den Angular-Build und anschließend wird der Node-Server gestartet. Standardmäßig nutzt der Proxy die bestehenden Heroku-Adressen. Abweichende Ziele können mit `BACKEND_BASE_URL` und `GRAPHQL_BASE_URL` gesetzt werden. Die Backend-URL ist die Origin ohne `/api/v1`.
+## Konfiguration
 
-Öffentliche Frontend-Adresse: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com>
+| Variable | Bedeutung | Standard |
+|---|---|---|
+| `PORT` | Port des Servers (Heroku setzt ihn selbst) | `5000` |
+| `BACKEND_BASE_URL` | Origin des Backends, ohne `/api/v1` | Heroku-Backend |
+| `GRAPHQL_BASE_URL` | Origin des Gateways, ohne `/graphql` | Heroku-Gateway |
 
-- Login: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com/login>
-- Registrierung: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com/register>
-- Angular-SPA: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com/app/>
+## Projektstruktur
 
-## Angular
+```
+server.mjs              Webserver und Proxy
+public/                 MPA: Login und Registrierung
+angular/src/app/
+  auth/                 Anmeldeseite der SPA
+  body-heatmap/         Körperfigur mit Muskel-Heatmap
+  core/                 Route Guard
+  dashboard/            Pläne, Übungen, Dialoge
+  auth.service.ts       Sitzung
+  graphql.service.ts    GraphQL-Aufrufe
+  plan.service.ts       Pläne und Übungen
+  config.ts             API-Pfade
+```
 
-Der Angular-Build nutzt `/app/` als Base-Href. Die API-Konfiguration zeigt auf gleich-origin `/api/v1` und `/graphql`; damit bleibt die HttpOnly-Session bei Browseranfragen verfügbar.
+## Deployment (Heroku)
+
+Das `Procfile` startet `npm start`. Beim Deploy baut `heroku-postbuild` die Angular-App. Der Angular-Build nutzt `/app/` als Base-Href.
