@@ -47,8 +47,46 @@ async function proxy(request, response, target) {
   }
 }
 
+async function handleAuthForm(request, response, mode) {
+  try {
+    const chunks = [];
+    for await (const chunk of request) chunks.push(chunk);
+    const values = new URLSearchParams(Buffer.concat(chunks).toString('utf8'));
+    const payload = mode === 'login'
+      ? { email: values.get('email'), password: values.get('password') }
+      : { username: values.get('username'), email: values.get('email'), password: values.get('password') };
+    if (mode === 'register' && values.get('password') !== values.get('confirmation')) {
+      response.writeHead(303, { Location: '/register?error=' + encodeURIComponent('Die Passwörter stimmen nicht überein.') });
+      return response.end();
+    }
+
+    const endpoint = mode === 'login' ? '/auth' : '/users';
+    const upstream = await fetch(`${backend}/api/v1${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (upstream.ok) {
+      const headers = { Location: mode === 'login' ? '/app/' : '/login?registered=1' };
+      const cookies = upstream.headers.getSetCookie();
+      if (cookies.length) headers['Set-Cookie'] = cookies;
+      response.writeHead(303, headers);
+      return response.end();
+    }
+    const result = await upstream.json().catch(() => ({}));
+    const error = result.message || 'Die Anfrage ist fehlgeschlagen.';
+    response.writeHead(303, { Location: `/${mode}?error=${encodeURIComponent(error)}` });
+    response.end();
+  } catch {
+    response.writeHead(303, { Location: `/${mode}?error=${encodeURIComponent('Der Anmeldedienst ist gerade nicht erreichbar.')}` });
+    response.end();
+  }
+}
+
 createServer(async (request, response) => {
   const url = new URL(request.url || '/', 'http://localhost');
+  if (request.method === 'POST' && url.pathname === '/login') return handleAuthForm(request, response, 'login');
+  if (request.method === 'POST' && url.pathname === '/register') return handleAuthForm(request, response, 'register');
   if (url.pathname.startsWith('/api/v1/')) return proxy(request, response, `${backend}${url.pathname}${url.search}`);
   if (url.pathname === '/graphql') return proxy(request, response, `${graphql}/graphql${url.search}`);
   if (url.pathname === '/') {

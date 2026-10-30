@@ -16,6 +16,10 @@ async function api(path, options = {}) {
 if (new URLSearchParams(location.search).has('registered')) {
   message.textContent = 'Registrierung erfolgreich. Du kannst dich jetzt anmelden.';
 }
+const apiError = new URLSearchParams(location.search).get('error');
+if (apiError) {
+  message.textContent = ({ 'Password wrong.': 'E-Mail oder Passwort ist falsch.', 'Email already registered.': 'Diese E-Mail-Adresse ist bereits registriert.' })[apiError] || apiError;
+}
 
 if (mode === 'login') {
   api('/users/me').then(() => location.replace('/app/')).catch(() => {});
