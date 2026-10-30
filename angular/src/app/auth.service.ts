@@ -5,7 +5,7 @@ import { API_URL } from './config';
 
 export interface LoginResponse {
   message: string;
-  token: string;
+  token?: string;
 }
 
 export interface User {
@@ -26,9 +26,7 @@ export class AuthService {
   private readonly api = API_URL;
 
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.api}/auth`, { email, password }).pipe(
-      tap((result) => this.storeSession(email, result.token))
-    );
+    return this.http.post<LoginResponse>(`${this.api}/auth`, { email, password });
   }
 
   register(username: string, email: string, password: string): Observable<unknown> {
@@ -46,34 +44,12 @@ export class AuthService {
   }
 
   logout(): Observable<unknown> {
-    const token = this.token;
-    if (!token) {
-      this.clearSession();
-      return new Observable((subscriber) => {
-        subscriber.next(null);
-        subscriber.complete();
-      });
-    }
-    return this.http.delete(`${this.api}/auth`, { body: { token } }).pipe(
+    return this.http.delete(`${this.api}/auth`).pipe(
       tap(() => this.clearSession())
     );
   }
 
-  storeSession(user: string, token: string): void {
-    sessionStorage.setItem('powerLevelUser', user);
-    sessionStorage.setItem('powerLevelToken', token);
-  }
-
   clearSession(): void {
-    sessionStorage.removeItem('powerLevelUser');
-    sessionStorage.removeItem('powerLevelToken');
-  }
-
-  get token(): string | null {
-    return sessionStorage.getItem('powerLevelToken');
-  }
-
-  get loggedIn(): boolean {
-    return Boolean(sessionStorage.getItem('powerLevelUser') && this.token);
+    // Authentication is stored in an HttpOnly cookie and cannot be read by JavaScript.
   }
 }

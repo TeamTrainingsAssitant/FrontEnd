@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Saiyan Sans';
-  src: url('/assets/fonts/Saiyan-Sans.ttf') format('truetype');
+  src: url('/app/assets/fonts/Saiyan-Sans.ttf') format('truetype');
   font-display: swap;
 }
 
