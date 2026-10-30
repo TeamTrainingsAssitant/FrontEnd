@@ -182,11 +182,10 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 .app-main { width: 100%; height: calc(100vh - 76px); height: calc(100dvh - 76px); min-height: 0; margin: 0 auto; padding: 18px clamp(16px, 3vw, 40px); overflow: hidden; }
 
 
-.training-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .editor-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
 @media (max-width: 760px) {
-  .training-fields { grid-template-columns: 1fr; }
+  .set-row { grid-template-columns: 58px minmax(0, 1fr) minmax(0, 1fr) 42px; gap: 7px; }
 }
 
 @media (max-width: 520px) {
@@ -244,6 +243,19 @@ input:focus, select:focus { border-color: var(--accent); background: #101722; bo
 .dialog-head img { width: 90px; height: 90px; border-radius: 8px; object-fit: cover; background: #fff; }
 .dialog-head h2 { margin: 0; }
 .dialog-head p { margin: 4px 0 0; }
+.set-list { display: grid; gap: 9px; margin-bottom: 18px; }
+.set-row { display: grid; grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 10px; }
+.set-row input { min-width: 0; }
+.set-row-header { color: var(--muted); font-size: .8rem; font-weight: 650; }
+.set-row strong { font-size: .9rem; }
+.set-check { width: 42px; min-height: 42px; padding: 0; border-color: #626b78; color: #f5f3ed; background: #626b78; box-shadow: none; font-size: 1.3rem; }
+.set-check:hover:not(:disabled) { background: #75808f; box-shadow: none; }
+.set-check.set-completed, .set-check.set-completed:hover:not(:disabled) { border-color: #248a54; color: #fff; background: #248a54; }
+.add-set-button { justify-self: start; min-height: 38px; border-color: var(--border-strong); color: var(--accent-bright); background: transparent; box-shadow: none; }
+.add-set-button:hover:not(:disabled) { background: var(--surface-highlight); box-shadow: none; }
+@media (max-width: 760px) {
+  .set-row { grid-template-columns: 58px minmax(0, 1fr) minmax(0, 1fr) 42px; gap: 7px; }
+}
 .dialog textarea { width: 100%; min-height: 72px; padding: 10px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-small); color: var(--text); background: #0d121b; font: inherit; }
 .dialog .editor-actions button[type="submit"] { margin-left: auto; }
 

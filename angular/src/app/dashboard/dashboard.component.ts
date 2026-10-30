@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../auth.service';
-import { Exercise, Plan, PlanExercise, PlanService } from '../plan.service';
+import { Exercise, Plan, PlanExercise, PlanService, TrainingSet } from '../plan.service';
 import { BodyHeatmapComponent } from '../body-heatmap/body-heatmap.component';
 
 // Welcher ExerciseDB-Muskel zu welcher Fläche der Körperfigur gehört
@@ -87,9 +87,7 @@ export class DashboardComponent {
   confirmRemove = false;
   dialogError = '';
   editingNote = '';
-  editingSets: number | null = null;
-  editingReps: number | null = null;
-  editingWeight: number | null = null;
+  trainingSets: TrainingSet[] = [];
   deletePassword = '';
   // Rückfrage vor dem Löschen des Kontos anzeigen
   confirmAccountDelete = false;
@@ -232,6 +230,7 @@ export class DashboardComponent {
 
   closeDialog(): void {
     this.dialogExercise = null;
+    this.trainingSets = [];
     this.showAlternatives = false;
     this.alternativeExercises = [];
     this.confirmRemove = false;
@@ -242,13 +241,15 @@ export class DashboardComponent {
   openPlanStats(plan: Plan): void {
     this.stats = { exercises: 0, sets: 0, reps: 0, volume: 0 };
     for (const exercise of this.columnExercises[plan.id] || []) {
-      const sets = exercise.sets || 0;
-      const reps = exercise.reps || 0;
-      const weight = exercise.weight || 0;
+      const trainingSets = exercise.trainingSets?.length
+        ? exercise.trainingSets
+        : Array.from({ length: exercise.sets || 0 }, () => ({ weight: exercise.weight, reps: exercise.reps, completed: false }));
       this.stats.exercises += 1;
-      this.stats.sets += sets;
-      this.stats.reps += sets * reps;
-      this.stats.volume += sets * reps * weight;
+      this.stats.sets += trainingSets.length;
+      for (const set of trainingSets) {
+        this.stats.reps += set.reps || 0;
+        this.stats.volume += (set.reps || 0) * (set.weight || 0);
+      }
     }
     this.heatmap = this.buildHeatmap(this.columnExercises[plan.id] || []);
     this.statsPlan = plan;
@@ -275,6 +276,10 @@ export class DashboardComponent {
 
   // Kurzinfo unter einer Übung, z. B. "60 kg · 3 × 10"
   exerciseInfo(exercise: PlanExercise): string {
+    if (exercise.trainingSets?.length) {
+      const completed = exercise.trainingSets.filter((set) => set.completed).length;
+      return `${exercise.trainingSets.length} Sätze${completed ? ` · ${completed} erledigt` : ''}`;
+    }
     const parts: string[] = [];
     if (exercise.weight !== null) parts.push(exercise.weight + ' kg');
     if (exercise.sets && exercise.reps) parts.push(exercise.sets + ' × ' + exercise.reps);
@@ -283,9 +288,19 @@ export class DashboardComponent {
 
   startEditingExercise(exercise: PlanExercise): void {
     this.editingNote = exercise.note || '';
-    this.editingSets = exercise.sets;
-    this.editingReps = exercise.reps;
-    this.editingWeight = exercise.weight;
+    if (exercise.trainingSets?.length) {
+      this.trainingSets = exercise.trainingSets.map((set) => ({ ...set }));
+    } else {
+      const previousSetCount = exercise.sets || 0;
+      this.trainingSets = previousSetCount
+        ? Array.from({ length: previousSetCount }, () => ({ weight: exercise.weight, reps: exercise.reps, completed: false }))
+        : [{ weight: null, reps: null, completed: false }];
+    }
+  }
+
+  addTrainingSet(): void {
+    if (this.trainingSets.length >= 20) return;
+    this.trainingSets = [...this.trainingSets, { weight: null, reps: null, completed: false }];
   }
 
   saveExercise(exercise: PlanExercise): void {
@@ -294,9 +309,7 @@ export class DashboardComponent {
       this.selectedPlan.id,
       exercise.id,
       this.editingNote,
-      this.editingSets,
-      this.editingReps,
-      this.editingWeight
+      this.trainingSets
     ).subscribe({
       next: (updated) => {
         this.loadColumn(this.selectedPlan!.id);

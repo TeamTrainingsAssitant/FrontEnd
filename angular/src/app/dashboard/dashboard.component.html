@@ -103,10 +103,17 @@
     </div>
 
     <form (ngSubmit)="saveExercise(dialogExercise)">
-      <div class="training-fields">
-        <label>Gewicht (kg) <input type="number" name="weight" [(ngModel)]="editingWeight" min="0" max="1000" step="any"></label>
-        <label>Sätze <input type="number" name="sets" [(ngModel)]="editingSets" min="1" max="20"></label>
-        <label>Wiederholungen <input type="number" name="reps" [(ngModel)]="editingReps" min="1" max="100"></label>
+      <div class="set-list">
+        <div class="set-row set-row-header" aria-hidden="true">
+          <span>Set</span><span>Gewicht (kg)</span><span>Reps</span><span></span>
+        </div>
+        <div class="set-row" *ngFor="let set of trainingSets; let i = index">
+          <strong>Set {{ i + 1 }}</strong>
+          <input type="number" [name]="'weight-' + i" [(ngModel)]="set.weight" [ngModelOptions]="{ standalone: true }" min="0" max="1000" step="any" [disabled]="set.completed" [attr.aria-label]="'Gewicht in kg für Set ' + (i + 1)">
+          <input type="number" [name]="'reps-' + i" [(ngModel)]="set.reps" [ngModelOptions]="{ standalone: true }" min="1" max="100" [disabled]="set.completed" [attr.aria-label]="'Reps für Set ' + (i + 1)">
+          <button type="button" class="set-check" [class.set-completed]="set.completed" [attr.aria-pressed]="set.completed" [attr.aria-label]="set.completed ? 'Set ' + (i + 1) + ' wieder freigeben' : 'Set ' + (i + 1) + ' abschließen'" (click)="set.completed = !set.completed">✓</button>
+        </div>
+        <button type="button" class="add-set-button" (click)="addTrainingSet()" [disabled]="trainingSets.length >= 20">+ Satz hinzufügen</button>
       </div>
       <label>Notiz <textarea name="note" [(ngModel)]="editingNote" maxlength="500" placeholder="z. B. Sitzhöhe 4, Griff eng"></textarea></label>
       <div class="editor-actions">

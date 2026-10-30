@@ -25,13 +25,20 @@ export interface PlanExercise extends Exercise {
   sets: number | null;
   reps: number | null;
   weight: number | null;
+  trainingSets: TrainingSet[];
+}
+
+export interface TrainingSet {
+  weight: number | null;
+  reps: number | null;
+  completed: boolean;
 }
 
 // GraphQL liefert IDs als Text, die Oberfläche rechnet mit Zahlen
 type WithStringId<T> = Omit<T, 'id'> & { id: string };
 
 const PLAN_FIELDS = 'id name description updatedAt exerciseCount';
-const EXERCISE_FIELDS = 'id externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups position note sets reps weight';
+const EXERCISE_FIELDS = 'id externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups position note sets reps weight trainingSets { weight reps completed }';
 const CATALOG_FIELDS = 'externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups';
 
 const toPlan = (plan: WithStringId<Plan>): Plan => ({ ...plan, id: Number(plan.id) });
@@ -103,9 +110,7 @@ export class PlanService {
     planId: number,
     exerciseId: number,
     note: string,
-    sets: number | null,
-    reps: number | null,
-    weight: number | null
+    trainingSets: TrainingSet[]
   ): Observable<PlanExercise> {
     return this.graphql
       .request<{ updatePlanExercise: WithStringId<PlanExercise> }>(
@@ -115,7 +120,7 @@ export class PlanService {
         {
           planId: String(planId),
           planExerciseId: String(exerciseId),
-          input: { note: note || null, sets, reps, weight }
+          input: { note: note || null, trainingSets }
         }
       )
       .pipe(map((data) => toPlanExercise(data.updatePlanExercise)));
