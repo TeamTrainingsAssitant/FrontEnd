@@ -25,7 +25,7 @@ export interface PlanExercise extends Exercise {
   sets: number | null;
   reps: number | null;
   weight: number | null;
-  trainingSets: TrainingSet[];
+  trainingSets?: TrainingSet[] | null;
 }
 
 export interface TrainingSet {
@@ -42,7 +42,11 @@ const EXERCISE_FIELDS = 'id externalId name gifUrl primaryMuscleGroups secondary
 const CATALOG_FIELDS = 'externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups';
 
 const toPlan = (plan: WithStringId<Plan>): Plan => ({ ...plan, id: Number(plan.id) });
-const toPlanExercise = (exercise: WithStringId<PlanExercise>): PlanExercise => ({ ...exercise, id: Number(exercise.id) });
+const toPlanExercise = (exercise: WithStringId<PlanExercise>): PlanExercise => ({
+  ...exercise,
+  id: Number(exercise.id),
+  trainingSets: exercise.trainingSets ?? []
+});
 
 @Injectable({ providedIn: 'root' })
 export class PlanService {
