@@ -10,6 +10,22 @@ const backend = process.env.BACKEND_BASE_URL || 'https://trainingsplan-backend-6
 const graphql = process.env.GRAPHQL_BASE_URL || 'https://trainingsplan-graphql-542db877a167.herokuapp.com';
 const mime = { '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.html': 'text/html; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2' };
 
+function tokenFromCookieHeader(header = '') {
+  const entry = header.split(';').map((part) => part.trim()).find((part) => part.startsWith('capsule_session='));
+  return entry?.slice('capsule_session='.length) || undefined;
+}
+
+function tokenFromSetCookies(cookies = []) {
+  const cookie = cookies.find((item) => item.startsWith('capsule_session='));
+  return cookie?.slice('capsule_session='.length).split(';', 1)[0];
+}
+
+function frontendSessionCookie(request, token, maxAge = 86400) {
+  const forwardedHttps = request.headers['x-forwarded-proto']?.split(',')[0].trim() === 'https';
+  const secure = forwardedHttps || Boolean(request.socket.encrypted);
+  return `capsule_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure ? '; Secure' : ''}`;
+}
+
 async function sendFile(response, path) {
   try {
     const body = await readFile(path);
@@ -25,22 +41,52 @@ async function proxy(request, response, target) {
   try {
     const chunks = [];
     for await (const chunk of request) chunks.push(chunk);
+    const url = new URL(request.url || '/', 'http://localhost');
+    const isLogin = request.method === 'POST' && url.pathname === '/api/v1/auth';
+    const isLogout = request.method === 'DELETE' && url.pathname === '/api/v1/auth';
+    const token = tokenFromCookieHeader(request.headers.cookie);
     const headers = new Headers(request.headers);
     headers.delete('host');
     headers.delete('connection');
     headers.delete('transfer-encoding');
+    headers.delete('content-length');
     headers.delete('origin');
+    headers.delete('cookie');
+    if (token && !headers.has('authorization')) headers.set('Authorization', `Bearer ${token}`);
+    let body = chunks.length ? Buffer.concat(chunks) : undefined;
+    if (isLogout && !body && token) {
+      body = Buffer.from(JSON.stringify({ token }));
+      headers.set('Content-Type', 'application/json');
+    }
     const upstream = await fetch(target, {
       method: request.method,
       headers,
-      body: chunks.length ? Buffer.concat(chunks) : undefined,
+      body,
       redirect: 'manual',
     });
     const responseHeaders = Object.fromEntries(upstream.headers);
     const cookies = upstream.headers.getSetCookie();
-    if (cookies.length) responseHeaders['set-cookie'] = cookies;
+    delete responseHeaders['set-cookie'];
+    delete responseHeaders['content-length'];
+    delete responseHeaders['content-encoding'];
+    const responseBody = Buffer.from(await upstream.arrayBuffer());
+
+    if (isLogin && upstream.ok) {
+      let payload = {};
+      try { payload = JSON.parse(responseBody.toString('utf8')); } catch { /* handled below */ }
+      const sessionToken = payload.token || tokenFromSetCookies(cookies);
+      if (!sessionToken) {
+        response.writeHead(502, { 'Content-Type': 'application/json; charset=utf-8' });
+        return response.end(JSON.stringify({ message: 'Backend hat kein Login-Token ausgegeben.' }));
+      }
+      responseHeaders['set-cookie'] = [frontendSessionCookie(request, sessionToken)];
+      responseHeaders['content-type'] = 'application/json; charset=utf-8';
+      response.writeHead(upstream.status, responseHeaders);
+      return response.end(JSON.stringify({ ...payload, token: null }));
+    }
+    if (isLogout && upstream.ok) responseHeaders['set-cookie'] = [frontendSessionCookie(request, '', 0)];
     response.writeHead(upstream.status, responseHeaders);
-    response.end(Buffer.from(await upstream.arrayBuffer()));
+    response.end(responseBody);
   } catch {
     response.writeHead(502, { 'Content-Type': 'text/plain; charset=utf-8' });
     response.end('Upstream service unavailable');
@@ -67,21 +113,22 @@ async function handleAuthForm(request, response, mode) {
       body: JSON.stringify(payload),
     });
     if (upstream.ok) {
-      const headers = { Location: mode === 'login' ? '/app/' : '/login?registered=1' };
-      const cookies = upstream.headers.getSetCookie();
+      const result = mode === 'login' ? await upstream.json().catch(() => ({})) : {};
+      const backendCookies = upstream.headers.getSetCookie();
+      const token = result.token || tokenFromSetCookies(backendCookies);
+      if (mode === 'login' && !token) {
+        response.writeHead(303, { Location: '/login?error=' + encodeURIComponent('Das Backend hat kein Login-Token ausgegeben.') });
+        return response.end();
+      }
       if (mode === 'login') {
-        const cookieHeader = cookies.map((cookie) => cookie.split(';', 1)[0]).join('; ');
-        if (!cookieHeader) {
-          response.writeHead(303, { Location: '/login?error=' + encodeURIComponent('Das Backend hat keine Login-Sitzung gesetzt. Bitte das Backend deployen.') });
-          return response.end();
-        }
-        const sessionCheck = await fetch(`${backend}/api/v1/users/me`, { headers: { Cookie: cookieHeader, Accept: 'application/json' } });
+        const sessionCheck = await fetch(`${backend}/api/v1/users/me`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
         if (!sessionCheck.ok) {
-          response.writeHead(303, { Location: '/login?error=' + encodeURIComponent('Das Backend hat keine gültige Login-Sitzung gesetzt. Bitte das Backend deployen.') });
+          response.writeHead(303, { Location: '/login?error=' + encodeURIComponent('Das Backend hat das Login-Token nicht akzeptiert.') });
           return response.end();
         }
       }
-      if (cookies.length) headers['Set-Cookie'] = cookies;
+      const headers = { Location: mode === 'login' ? '/app/' : '/login?registered=1' };
+      if (mode === 'login') headers['Set-Cookie'] = [frontendSessionCookie(request, token)];
       response.writeHead(303, headers);
       return response.end();
     }
