@@ -62,6 +62,9 @@ createServer(async (request, response) => {
   if (url.pathname === '/login' || url.pathname === '/register') {
     return sendFile(response, resolve(publicDir, `${url.pathname.slice(1)}.html`));
   }
+  if (url.pathname === '/auth.js' || url.pathname === '/auth.css') {
+    return sendFile(response, resolve(publicDir, url.pathname.slice(1)));
+  }
   if (url.pathname.startsWith('/app/')) {
     const relative = decodeURIComponent(url.pathname.slice('/app/'.length));
     const file = resolve(spaDir, relative || 'index.html');
