@@ -117,6 +117,14 @@ export class PlanService {
     note: string,
     trainingSets: TrainingSet[]
   ): Observable<PlanExercise> {
+    const firstSet = trainingSets[0];
+    const legacyValues = trainingSets.length
+      ? {
+          weight: firstSet.weight,
+          sets: trainingSets.length,
+          reps: firstSet.reps
+        }
+      : { weight: null, sets: null, reps: null };
     return this.graphql
       .request<{ updatePlanExercise: WithStringId<PlanExercise> }>(
         `mutation ($planId: ID!, $planExerciseId: ID!, $input: UpdatePlanExerciseInput!) {
@@ -127,7 +135,8 @@ export class PlanService {
           planExerciseId: String(exerciseId),
           input: {
             note: note || null,
-            trainingSets: trainingSets.length ? trainingSets : null
+            trainingSets: trainingSets.length ? trainingSets : null,
+            ...legacyValues
           }
         }
       )
