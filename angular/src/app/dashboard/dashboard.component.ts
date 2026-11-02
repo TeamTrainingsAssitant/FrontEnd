@@ -310,6 +310,15 @@ export class DashboardComponent {
 
   saveExercise(exercise: PlanExercise): void {
     if (!this.selectedPlan) return;
+    const incompleteSet = this.trainingSets.some((set) =>
+      set.weight === null || !Number.isFinite(set.weight) || set.weight < 0 ||
+      set.reps === null || !Number.isInteger(set.reps) || set.reps < 1 || set.reps > 100
+    );
+    if (incompleteSet) {
+      this.dialogError = 'Bitte gib für jeden Satz ein gültiges Gewicht und Wiederholungen ein.';
+      return;
+    }
+    this.dialogError = '';
     this.plansApi.updateExercise(
       this.selectedPlan.id,
       exercise.id,
