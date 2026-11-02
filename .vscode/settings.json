@@ -1,9 +1,0 @@
-{
-  "typescript.tsdk": "${workspaceFolder}/angular/node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "files.exclude": {
-    "**/node_modules": true,
-    "**/.angular": true,
-    "**/dist": true
-  }
-}
