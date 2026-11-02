@@ -125,7 +125,10 @@ export class PlanService {
         {
           planId: String(planId),
           planExerciseId: String(exerciseId),
-          input: { note: note || null, trainingSets }
+          input: {
+            note: note || null,
+            trainingSets: trainingSets.length ? trainingSets : null
+          }
         }
       )
       .pipe(map((data) => toPlanExercise(data.updatePlanExercise)));

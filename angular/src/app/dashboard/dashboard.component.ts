@@ -312,11 +312,18 @@ export class DashboardComponent {
 
   saveExercise(exercise: PlanExercise): void {
     if (!this.selectedPlan) return;
-    const incompleteSet = this.trainingSets.some((set) =>
-      set.weight === null || !Number.isFinite(set.weight) || set.weight < 0 ||
-      set.reps === null || !Number.isInteger(set.reps) || set.reps < 1 || set.reps > 100
+    const hasInput = this.trainingSets.some((set) => set.weight !== null || set.reps !== null);
+    const hasIncompleteSet = this.trainingSets.some((set) =>
+      (set.weight === null) !== (set.reps === null)
     );
-    if (incompleteSet) {
+    const completeSets = this.trainingSets
+      .filter((set) => set.weight !== null && set.reps !== null)
+      .map((set) => ({ weight: Number(set.weight), reps: Number(set.reps) }));
+    const invalidSet = completeSets.some((set) =>
+      !Number.isFinite(set.weight) || set.weight < 0 || set.weight > 1000 ||
+      !Number.isInteger(set.reps) || set.reps < 1 || set.reps > 100
+    );
+    if (hasInput && (hasIncompleteSet || invalidSet)) {
       this.dialogError = 'Bitte gib für jeden Satz ein gültiges Gewicht und Wiederholungen ein.';
       return;
     }
@@ -325,7 +332,7 @@ export class DashboardComponent {
       this.selectedPlan.id,
       exercise.id,
       this.editingNote,
-      this.trainingSets
+      completeSets
     ).subscribe({
       next: (updated) => {
         this.loadColumn(this.selectedPlan!.id);
@@ -385,8 +392,12 @@ export class DashboardComponent {
 
   createPlan(): void {
     if (this.planForm.invalid) return;
-    const values = this.planForm.getRawValue();
-    this.plansApi.create(values.name, '').subscribe({
+    const name = this.planForm.controls.name.value.trim();
+    if (!name) {
+      this.error = 'Bitte gib einen Namen für den Trainingsplan ein.';
+      return;
+    }
+    this.plansApi.create(name, '').subscribe({
       next: (plan) => {
         this.plans = [plan, ...this.plans];
         this.columnExercises[plan.id] = [];
@@ -501,7 +512,9 @@ export class DashboardComponent {
     return ({
       'Not authenticated.': 'Die Anmeldung ist abgelaufen. Bitte erneut einloggen.',
       'Plan not found.': 'Trainingsplan nicht gefunden.',
-      'ExerciseDB not reachable.': 'Der Übungskatalog ist gerade nicht verfügbar.'
+      'ExerciseDB not reachable.': 'Der Übungskatalog ist gerade nicht verfügbar.',
+      'Invalid request.': 'Die Eingaben konnten nicht gespeichert werden. Bitte prüfe Planname, Gewicht und Wiederholungen.',
+      'trainingSets must not be empty': 'Bitte gib mindestens einen vollständigen Trainingssatz ein.'
     } as Record<string, string>)[message] || message;
   }
 }
