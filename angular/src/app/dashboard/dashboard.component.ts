@@ -243,7 +243,7 @@ export class DashboardComponent {
     for (const exercise of this.columnExercises[plan.id] || []) {
       const trainingSets = exercise.trainingSets?.length
         ? exercise.trainingSets
-        : Array.from({ length: exercise.sets || 0 }, () => ({ weight: exercise.weight, reps: exercise.reps, completed: false }));
+        : Array.from({ length: exercise.sets || 0 }, () => ({ weight: exercise.weight, reps: exercise.reps }));
       this.stats.exercises += 1;
       this.stats.sets += trainingSets.length;
       for (const set of trainingSets) {
@@ -277,8 +277,7 @@ export class DashboardComponent {
   // Kurzinfo unter einer Übung, z. B. "60 kg · 3 × 10"
   exerciseInfo(exercise: PlanExercise): string {
     if (exercise.trainingSets?.length) {
-      const completed = exercise.trainingSets.filter((set) => set.completed).length;
-      return `${exercise.trainingSets.length} Sätze${completed ? ` · ${completed} erledigt` : ''}`;
+      return `${exercise.trainingSets.length} Sätze`;
     }
     const parts: string[] = [];
     if (exercise.weight !== null) parts.push(exercise.weight + ' kg');
@@ -293,14 +292,14 @@ export class DashboardComponent {
     } else {
       const previousSetCount = exercise.sets || 0;
       this.trainingSets = previousSetCount
-        ? Array.from({ length: previousSetCount }, () => ({ weight: exercise.weight, reps: exercise.reps, completed: false }))
-        : [{ weight: null, reps: null, completed: false }];
+        ? Array.from({ length: previousSetCount }, () => ({ weight: exercise.weight, reps: exercise.reps }))
+        : [{ weight: null, reps: null }];
     }
   }
 
   addTrainingSet(): void {
     if (this.trainingSets.length >= 20) return;
-    this.trainingSets = [...this.trainingSets, { weight: null, reps: null, completed: false }];
+    this.trainingSets = [...this.trainingSets, { weight: null, reps: null }];
   }
 
   removeLastTrainingSet(): void {
