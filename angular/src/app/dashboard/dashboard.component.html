@@ -1,0 +1,196 @@
+<header class="topbar">
+  <strong class="brand">Capsule Gym <small>Training</small></strong>
+  <div class="account">
+    <button class="link-button" type="button" (click)="profileOpen = true">{{ user?.username }}</button>
+    <button class="link-button" type="button" (click)="logout()">Abmelden</button>
+  </div>
+</header>
+
+<main class="app-main">
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <div class="planner">
+    <aside class="rail" aria-label="Übungen">
+      <h2>Übungen</h2>
+      <input [(ngModel)]="exerciseSearch" (keyup.enter)="loadExercises()" placeholder="Übung suchen" aria-label="Übung suchen">
+      <select [(ngModel)]="selectedMuscle" (change)="loadExercises()" aria-label="Muskelgruppe">
+        <option value="">Alle Muskelgruppen</option>
+        <option *ngFor="let group of muscleGroups" [value]="group.label">{{ group.label }}</option>
+      </select>
+      <label>„+“ fügt hinzu zu
+        <select [(ngModel)]="targetPlanId">
+          <option *ngFor="let plan of plans" [ngValue]="plan.id">{{ plan.name }}</option>
+        </select>
+      </label>
+
+      <p class="muted" *ngIf="exercisesLoading">Übungen werden geladen …</p>
+      <ul class="rail-list">
+        <li class="column-card" *ngFor="let exercise of exercises" draggable="true"
+            (dragstart)="draggedExercise = exercise" (dragend)="draggedExercise = null">
+          <img [src]="exercise.gifUrl" alt="" loading="lazy">
+          <div>
+            <strong>{{ exercise.name }}</strong>
+            <small>{{ exercise.primaryMuscleGroups.join(', ') }}</small>
+          </div>
+          <button class="icon-button" type="button" [title]="exercise.name + ' hinzufügen'" (click)="addToTargetPlan(exercise)">+</button>
+        </li>
+      </ul>
+      <p class="muted" *ngIf="!exercisesLoading && !exercises.length">Keine Übungen gefunden.</p>
+    </aside>
+
+    <section>
+      <p class="eyebrow">DEIN TRAINING</p>
+      <h1>Trainingspläne</h1>
+      <div class="board">
+        <section class="plan-column" *ngFor="let plan of plans" [class.drop-target]="draggedExercise"
+                 (dragover)="$event.preventDefault()" (drop)="dropOnPlan(plan)">
+          <header class="plan-column-head">
+            <h2><button class="plan-title" type="button" title="Statistik anzeigen" (click)="openPlanStats(plan)">{{ plan.name }}</button></h2>
+            <button class="icon-button" type="button" title="Umbenennen" (click)="startRename(plan)">✎</button>
+            <button class="icon-button" type="button" title="Löschen" (click)="planToDelete = plan">×</button>
+          </header>
+          <form class="rename-form" *ngIf="planToRename === plan" (ngSubmit)="renamePlan(plan)">
+            <input name="renameValue" [(ngModel)]="renameValue" maxlength="60" aria-label="Neuer Name">
+            <button type="submit">Speichern</button>
+            <button type="button" class="link-button" (click)="planToRename = null">Abbrechen</button>
+          </form>
+          <div class="delete-confirm" *ngIf="planToDelete === plan">
+            <p>„{{ plan.name }}“ wirklich löschen?</p>
+            <button type="button" class="danger" (click)="deletePlan(plan)">Löschen</button>
+            <button type="button" class="link-button" (click)="planToDelete = null">Abbrechen</button>
+          </div>
+          <ol class="column-exercises">
+            <li *ngFor="let exercise of columnExercises[plan.id]; let i = index; let last = last" class="reorder-item"
+                draggable="true"
+                [class.dragging]="draggedPlanExercise?.exercise?.id === exercise.id"
+                [class.drop-before]="showDropMarker(plan.id, i)"
+                [class.drop-after]="last && showDropMarker(plan.id, i + 1)"
+                (dragstart)="startReorder(plan.id, exercise, $event)"
+                (dragover)="reorderOver(plan.id, i, $event)"
+                (drop)="dropReorder(plan.id, $event)"
+                (dragend)="endReorder()">
+              <button class="column-card card-button" type="button" (click)="openExercise(plan, exercise)">
+                <img *ngIf="exercise.gifUrl" [src]="exercise.gifUrl" alt="" loading="lazy">
+                <div>
+                  <strong>{{ i + 1 }}. {{ exercise.name }}</strong>
+                  <small>{{ exerciseInfo(exercise) || 'Antippen, um Werte einzutragen' }}</small>
+                </div>
+              </button>
+            </li>
+            <li class="column-empty" *ngIf="!columnExercises[plan.id]?.length">Noch keine Übungen</li>
+          </ol>
+          <footer><small>{{ plan.exerciseCount }} Übungen</small></footer>
+        </section>
+
+        <form class="plan-column add-plan" [formGroup]="planForm" (ngSubmit)="createPlan()">
+          <label>Neuer Trainingsplan <input formControlName="name" maxlength="60" placeholder="z. B. Oberkörper"></label>
+          <button type="submit" [disabled]="planForm.invalid">+ Trainingsplan</button>
+        </form>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Übungs-Dialog -->
+<div class="dialog-backdrop" *ngIf="dialogExercise">
+  <section class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="dialogExercise.name">
+    <div class="dialog-head">
+      <img *ngIf="dialogExercise.gifUrl" [src]="dialogExercise.gifUrl" alt="">
+      <div>
+        <h2>{{ dialogExercise.name }}</h2>
+        <p class="muted">{{ dialogExercise.primaryMuscleGroups.join(', ') }} · {{ selectedPlan?.name }}</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="saveExercise(dialogExercise)">
+      <div class="set-list">
+        <div class="set-row set-row-header" aria-hidden="true">
+          <span>Set</span><span>Gewicht (kg)</span><span>Reps</span>
+        </div>
+        <div class="set-row" *ngFor="let set of trainingSets; let i = index">
+          <strong>Set {{ i + 1 }}</strong>
+          <input type="number" [name]="'weight-' + i" [(ngModel)]="set.weight" [ngModelOptions]="{ standalone: true }" min="0" max="1000" step="any" [attr.aria-label]="'Gewicht in kg für Set ' + (i + 1)">
+          <input type="number" [name]="'reps-' + i" [(ngModel)]="set.reps" [ngModelOptions]="{ standalone: true }" min="1" max="100" [attr.aria-label]="'Reps für Set ' + (i + 1)">
+        </div>
+        <div class="set-list-actions">
+          <button type="button" class="add-set-button" (click)="addTrainingSet()" [disabled]="trainingSets.length >= 20">+ Satz hinzufügen</button>
+          <button type="button" class="remove-set-button" (click)="removeLastTrainingSet()" [disabled]="trainingSets.length <= 1">− Letzten Satz entfernen</button>
+        </div>
+      </div>
+      <label>Notiz <textarea name="note" [(ngModel)]="editingNote" maxlength="500" placeholder="z. B. Sitzhöhe 4, Griff eng"></textarea></label>
+      <div class="editor-actions">
+        <button type="button" class="danger" (click)="confirmRemove = true">Entfernen</button>
+        <button type="button" class="link-button" (click)="closeDialog()">Abbrechen</button>
+        <button type="submit">Speichern</button>
+      </div>
+    </form>
+
+    <p class="error" *ngIf="dialogError">{{ dialogError }}</p>
+
+    <div class="delete-confirm" *ngIf="confirmRemove">
+      <p>„{{ dialogExercise.name }}“ aus dem Plan entfernen?</p>
+      <button type="button" class="danger" (click)="removeExercise()">Ja, entfernen</button>
+      <button type="button" class="link-button" (click)="confirmRemove = false">Abbrechen</button>
+    </div>
+
+    <!-- Alternativen für die gleichen Muskeln (F14) -->
+    <button type="button" class="alternatives-toggle" (click)="toggleAlternatives()" [attr.aria-expanded]="showAlternatives">
+      Gerät belegt? Alternativen anzeigen {{ showAlternatives ? '▴' : '▾' }}
+    </button>
+    <div *ngIf="showAlternatives">
+      <p class="muted" *ngIf="alternativesLoading">Alternativen werden gesucht …</p>
+      <p class="muted" *ngIf="!alternativesLoading && !alternativeExercises.length">Keine Alternativen gefunden.</p>
+      <ul class="alternatives-list">
+        <li class="column-card" *ngFor="let alternative of alternativeExercises">
+          <img *ngIf="alternative.gifUrl" [src]="alternative.gifUrl" alt="" loading="lazy">
+          <div>
+            <strong>{{ alternative.name }}</strong>
+            <small>{{ alternative.primaryMuscleGroups.join(', ') }}</small>
+          </div>
+          <button type="button" class="link-button" (click)="replaceExerciseWith(alternative)">Ersetzen</button>
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<!-- Profil als Fenster in der Mitte -->
+<div class="dialog-backdrop" *ngIf="profileOpen">
+  <section class="dialog profile-dialog" role="dialog" aria-modal="true" aria-label="Mein Profil">
+    <h2>{{ user?.username }}</h2><p class="muted">{{ user?.email }}</p>
+
+
+    <button type="button" (click)="exportUserData()">Meine Daten exportieren</button>
+    <label>Konto löschen: Passwort bestätigen <input type="password" [(ngModel)]="deletePassword"></label>
+    <button type="button" class="danger" *ngIf="!confirmAccountDelete" [disabled]="!deletePassword" (click)="confirmAccountDelete = true">Konto dauerhaft löschen</button>
+    <div class="delete-confirm" *ngIf="confirmAccountDelete">
+      <p>Konto und alle Trainingspläne wirklich löschen?</p>
+      <button type="button" class="danger" (click)="deleteAccount()">Ja, löschen</button>
+      <button type="button" class="link-button" (click)="confirmAccountDelete = false">Abbrechen</button>
+    </div>
+    <div class="editor-actions">
+      <button type="button" class="link-button" (click)="profileOpen = false; confirmAccountDelete = false">Schließen</button>
+    </div>
+  </section>
+</div>
+
+<!-- Statistik eines Plans (F13) -->
+<div class="dialog-backdrop" *ngIf="statsPlan">
+  <section class="dialog profile-dialog" role="dialog" aria-modal="true" [attr.aria-label]="'Statistik ' + statsPlan.name">
+    <h2>{{ statsPlan.name }}</h2>
+    <p class="muted">{{ statsPlan.description }}</p>
+    <div class="stats-grid">
+      <div><strong>{{ stats.exercises }}</strong><span>Übungen</span></div>
+      <div><strong>{{ stats.sets }}</strong><span>Sätze gesamt</span></div>
+      <div><strong>{{ stats.reps }}</strong><span>Wiederholungen gesamt</span></div>
+      <div><strong>{{ stats.volume }} kg</strong><span>Gesamtgewicht (Gewicht × Sätze × Wdh.)</span></div>
+    </div>
+
+    <!-- Muskel-Heatmap: je röter die Fläche, desto mehr wird der Muskel trainiert -->
+    <h3>Trainierte Muskeln</h3>
+    <app-body-heatmap [levels]="heatmap"></app-body-heatmap>
+    <div class="editor-actions">
+      <button type="button" class="link-button" (click)="statsPlan = null">Schließen</button>
+    </div>
+  </section>
+</div>
