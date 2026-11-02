@@ -130,7 +130,10 @@ export class DashboardComponent {
     this.columnRequests.set(planId, request);
     this.plansApi.listExercises(planId).subscribe({
       next: (exercises) => {
-        if (this.columnRequests.get(planId) === request) this.columnExercises[planId] = exercises;
+        if (this.columnRequests.get(planId) === request) {
+          this.columnExercises[planId] = exercises;
+          this.updatePlanCount(planId, exercises.length);
+        }
       },
       error: (error: unknown) => {
         if (this.columnRequests.get(planId) === request) {
