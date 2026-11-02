@@ -47,6 +47,8 @@ const toPlanExercise = (exercise: WithStringId<PlanExercise>): PlanExercise => (
   trainingSets: exercise.trainingSets ?? []
 });
 
+export const EXERCISE_PAGE_SIZE = 50;
+
 @Injectable({ providedIn: 'root' })
 export class PlanService {
   private readonly graphql = inject(GraphqlService);
@@ -173,30 +175,37 @@ export class PlanService {
     );
   }
 
-  searchExercises(name = '', muscles: string[] = []): Observable<{ total: number; exercises: Exercise[] }> {
+  searchExercises(name = '', muscles: string[] = [], offset = 0): Observable<{ hasMore: boolean; exercises: Exercise[] }> {
     if (muscles.length > 1) {
-      return forkJoin(muscles.map((muscle) => this.searchExercisesForMuscles(name, [muscle], 50))).pipe(
+      return forkJoin(muscles.map((muscle) => this.searchExercisesForMuscles(name, [muscle], offset))).pipe(
         map((results) => {
           const unique = new Map<string, Exercise>();
           results.forEach((result) => result.exercises.forEach((exercise) => unique.set(exercise.externalId, exercise)));
-          const exercises = [...unique.values()];
-          return { total: exercises.length, exercises: exercises.slice(0, 20) };
+          return {
+            hasMore: results.some((result) => result.total > offset + EXERCISE_PAGE_SIZE),
+            exercises: [...unique.values()]
+          };
         })
       );
     }
-    return this.searchExercisesForMuscles(name, muscles, 20);
+    return this.searchExercisesForMuscles(name, muscles, offset).pipe(
+      map((result) => ({
+        hasMore: result.total > offset + EXERCISE_PAGE_SIZE,
+        exercises: result.exercises
+      }))
+    );
   }
 
-  private searchExercisesForMuscles(name: string, muscles: string[], limit: number): Observable<{ total: number; exercises: Exercise[] }> {
+  private searchExercisesForMuscles(name: string, muscles: string[], offset: number): Observable<{ total: number; exercises: Exercise[] }> {
     return this.graphql
       .request<{ exercises: { total: number; exercises: Exercise[] } }>(
-        `query ($name: String, $muscles: [String!], $limit: Int) {
-          exercises(name: $name, muscles: $muscles, limit: $limit) {
+        `query ($name: String, $muscles: [String!], $offset: Int, $limit: Int) {
+          exercises(name: $name, muscles: $muscles, offset: $offset, limit: $limit) {
             total
             exercises { ${CATALOG_FIELDS} }
           }
         }`,
-        { name: name || null, muscles: muscles.length ? muscles : null, limit }
+        { name: name || null, muscles: muscles.length ? muscles : null, offset, limit: EXERCISE_PAGE_SIZE }
       )
       .pipe(map((data) => data.exercises));
   }

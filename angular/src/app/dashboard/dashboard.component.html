@@ -36,6 +36,7 @@
         </li>
       </ul>
       <p class="muted" *ngIf="!exercisesLoading && !exercises.length">Keine Übungen gefunden.</p>
+      <button class="link-button" type="button" *ngIf="exercisesHaveMore" [disabled]="exercisesLoading" (click)="loadMoreExercises()">Mehr laden</button>
     </aside>
 
     <section>

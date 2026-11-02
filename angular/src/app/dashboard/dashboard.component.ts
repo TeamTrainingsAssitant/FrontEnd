@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../auth.service';
-import { Exercise, Plan, PlanExercise, PlanService, TrainingSet } from '../plan.service';
+import { EXERCISE_PAGE_SIZE, Exercise, Plan, PlanExercise, PlanService, TrainingSet } from '../plan.service';
 import { BodyHeatmapComponent } from '../body-heatmap/body-heatmap.component';
 
 // Welcher ExerciseDB-Muskel zu welcher Fläche der Körperfigur gehört
@@ -79,6 +79,9 @@ export class DashboardComponent {
   selectedMuscle = '';
   muscleGroups: { label: string; muscles: string[] }[] = [];
   exercisesLoading = false;
+  exercisesHaveMore = false;
+  private exerciseOffset = 0;
+  private exerciseRequest = 0;
   selectedPlan: Plan | null = null;
   // Zustand im Übungs-Dialog
   showAlternatives = false;
@@ -414,14 +417,32 @@ export class DashboardComponent {
   }
 
   loadExercises(): void {
+    this.exerciseOffset = 0;
+    this.fetchExercises();
+  }
+
+  loadMoreExercises(): void {
+    this.exerciseOffset += EXERCISE_PAGE_SIZE;
+    this.fetchExercises();
+  }
+
+  private fetchExercises(): void {
+    const request = ++this.exerciseRequest;
+    const offset = this.exerciseOffset;
     this.exercisesLoading = true;
     const muscles = this.muscleGroups.find((group) => group.label === this.selectedMuscle)?.muscles ?? [];
-    this.plansApi.searchExercises(this.exerciseSearch, muscles).subscribe({
+    this.plansApi.searchExercises(this.exerciseSearch, muscles, offset).subscribe({
       next: (result) => {
-        this.exercises = result.exercises;
+        if (request !== this.exerciseRequest) return;
+        const known = offset === 0 ? [] : this.exercises;
+        const knownIds = new Set(known.map((exercise) => exercise.externalId));
+        this.exercises = [...known, ...result.exercises.filter((exercise) => !knownIds.has(exercise.externalId))];
+        this.exercisesHaveMore = result.hasMore;
         this.exercisesLoading = false;
       },
       error: (error: unknown) => {
+        if (request !== this.exerciseRequest) return;
+        this.exerciseOffset = Math.max(offset - EXERCISE_PAGE_SIZE, 0);
         this.error = this.apiMessage(error, 'Übungen konnten nicht geladen werden.');
         this.exercisesLoading = false;
       }
