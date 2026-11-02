@@ -135,7 +135,7 @@ export class PlanService {
           planExerciseId: String(exerciseId),
           input: {
             note: note || null,
-            trainingSets: trainingSets.length ? trainingSets : null,
+            trainingSets,
             ...legacyValues
           }
         }

@@ -82,6 +82,7 @@ export class DashboardComponent {
   exercisesHaveMore = false;
   private exerciseOffset = 0;
   private exerciseRequest = 0;
+  private readonly columnRequests = new Map<number, number>();
   selectedPlan: Plan | null = null;
   // Zustand im Übungs-Dialog
   showAlternatives = false;
@@ -125,9 +126,17 @@ export class DashboardComponent {
   }
 
   loadColumn(planId: number): void {
+    const request = (this.columnRequests.get(planId) || 0) + 1;
+    this.columnRequests.set(planId, request);
     this.plansApi.listExercises(planId).subscribe({
-      next: (exercises) => this.columnExercises[planId] = exercises,
-      error: (error: unknown) => this.error = this.apiMessage(error, 'Planübungen konnten nicht geladen werden.')
+      next: (exercises) => {
+        if (this.columnRequests.get(planId) === request) this.columnExercises[planId] = exercises;
+      },
+      error: (error: unknown) => {
+        if (this.columnRequests.get(planId) === request) {
+          this.error = this.apiMessage(error, 'Planübungen konnten nicht geladen werden.');
+        }
+      }
     });
   }
 
