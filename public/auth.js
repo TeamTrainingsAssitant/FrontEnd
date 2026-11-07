@@ -13,6 +13,20 @@ async function api(path, options = {}) {
   return result;
 }
 
+async function graphql(query, variables = {}) {
+  const response = await fetch('/graphql', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ query, variables }),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result.errors?.length) {
+    throw new Error(result.errors?.[0]?.message || result.message || 'Die Anfrage ist fehlgeschlagen.');
+  }
+  return result.data;
+}
+
 if (new URLSearchParams(location.search).has('registered')) {
   message.textContent = 'Registrierung erfolgreich. Du kannst dich jetzt anmelden.';
 }
@@ -36,7 +50,10 @@ form.addEventListener('submit', async (event) => {
       location.assign('/login?registered=1');
       return;
     }
-    await api('/auth', { method: 'POST', body: JSON.stringify({ email: values.email, password: values.password }) });
+    await graphql(
+      'mutation ($input: LoginInput!) { login(input: $input) { message token } }',
+      { input: { email: values.email, password: values.password } }
+    );
     try {
       await api('/users/me');
     } catch {

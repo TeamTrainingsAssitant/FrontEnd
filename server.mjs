@@ -69,7 +69,7 @@ async function proxy(request, response, target) {
     delete responseHeaders['set-cookie'];
     delete responseHeaders['content-length'];
     delete responseHeaders['content-encoding'];
-    const responseBody = Buffer.from(await upstream.arrayBuffer());
+    let responseBody = Buffer.from(await upstream.arrayBuffer());
 
     if (isLogin && upstream.ok) {
       let payload = {};
@@ -83,6 +83,18 @@ async function proxy(request, response, target) {
       responseHeaders['content-type'] = 'application/json; charset=utf-8';
       response.writeHead(upstream.status, responseHeaders);
       return response.end(JSON.stringify({ ...payload, token: null }));
+    }
+    if (url.pathname === '/graphql' && upstream.ok) {
+      try {
+        const payload = JSON.parse(responseBody.toString('utf8'));
+        const login = payload.data?.login;
+        if (typeof login?.token === 'string' && login.token) {
+          responseHeaders['set-cookie'] = [frontendSessionCookie(request, login.token)];
+          login.token = null;
+          responseHeaders['content-type'] = 'application/json; charset=utf-8';
+          responseBody = Buffer.from(JSON.stringify(payload));
+        }
+      } catch { /* Non-JSON GraphQL responses pass through unchanged. */ }
     }
     if (isLogout && upstream.ok) responseHeaders['set-cookie'] = [frontendSessionCookie(request, '', 0)];
     response.writeHead(upstream.status, responseHeaders);

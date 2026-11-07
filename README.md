@@ -24,6 +24,7 @@ Live: <https://trainingsplan-frontend-be8f5157e428.herokuapp.com>
 
 `server.mjs` liefert Login und Registrierung aus, stellt die Angular-App unter `/app/` bereit und leitet API-Aufrufe an Backend und GraphQL-Gateway weiter.
 
+Die Login-Seite meldet sich über die GraphQL-Mutation `login` an.
 Die Sitzung wird als `HttpOnly`-Cookie gespeichert. Der Server verwendet das Cookie-Token für authentifizierte API-Aufrufe.
 
 ## Deployment
