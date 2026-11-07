@@ -1,1 +1,65 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b10"><title>Registrieren · Capsule Gym</title><link rel="stylesheet" href="/auth.css"><script src="/auth.js" defer></script></head><body><main class="card"><div class="brand">Capsule Gym</div><h1>Konto erstellen</h1><p>Erstelle dein persönliches Konto und starte mit deinem Trainingsplan.</p><form data-mode="register" action="/register" method="post"><label for="username">Benutzername</label><input id="username" name="username" minlength="3" autocomplete="username" required><label for="email">E-Mail</label><input id="email" name="email" type="email" autocomplete="email" required><label for="password">Passwort</label><input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required><label for="confirmation">Passwort wiederholen</label><input id="confirmation" name="confirmation" type="password" minlength="8" autocomplete="new-password" required><button type="submit">Registrieren</button><p class="message" role="status" aria-live="polite"></p></form><div class="footer">Schon registriert? <a href="/login">Zum Login</a></div></main></body></html>
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090b10">
+    <title>Registrieren · Capsule Gym</title>
+    <link rel="stylesheet" href="/auth.css">
+    <script src="/auth.js" defer></script>
+  </head>
+  <body>
+    <main class="card">
+      <div class="brand">Capsule Gym</div>
+      <h1>Konto erstellen</h1>
+      <p>Erstelle dein persönliches Konto und starte mit deinem Trainingsplan.</p>
+
+      <form data-mode="register" action="/register" method="post">
+        <label for="username">Benutzername</label>
+        <input
+          id="username"
+          name="username"
+          minlength="3"
+          autocomplete="username"
+          required
+        >
+
+        <label for="email">E-Mail</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+        >
+
+        <label for="password">Passwort</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          minlength="8"
+          autocomplete="new-password"
+          required
+        >
+
+        <label for="confirmation">Passwort wiederholen</label>
+        <input
+          id="confirmation"
+          name="confirmation"
+          type="password"
+          minlength="8"
+          autocomplete="new-password"
+          required
+        >
+
+        <button type="submit">Registrieren</button>
+        <p class="message" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="footer">
+        Schon registriert? <a href="/login">Zum Login</a>
+      </div>
+    </main>
+  </body>
+</html>

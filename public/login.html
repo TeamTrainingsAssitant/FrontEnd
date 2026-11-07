@@ -1,1 +1,45 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b10"><title>Anmelden · Capsule Gym</title><link rel="stylesheet" href="/auth.css"><script src="/auth.js" defer></script></head><body><main class="card"><div class="brand">Capsule Gym</div><h1>Willkommen zurück</h1><p>Melde dich an, um deine Trainingspläne zu öffnen.</p><form data-mode="login" action="/login" method="post"><label for="email">E-Mail</label><input id="email" name="email" type="email" autocomplete="email" required><label for="password">Passwort</label><input id="password" name="password" type="password" autocomplete="current-password" required><button type="submit">Anmelden</button><p class="message" role="status" aria-live="polite"></p></form><div class="footer">Noch kein Konto? <a href="/register">Jetzt registrieren</a></div></main></body></html>
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090b10">
+    <title>Anmelden · Capsule Gym</title>
+    <link rel="stylesheet" href="/auth.css">
+    <script src="/auth.js" defer></script>
+  </head>
+  <body>
+    <main class="card">
+      <div class="brand">Capsule Gym</div>
+      <h1>Willkommen zurück</h1>
+      <p>Melde dich an, um deine Trainingspläne zu öffnen.</p>
+
+      <form data-mode="login" action="/login" method="post">
+        <label for="email">E-Mail</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+        >
+
+        <label for="password">Passwort</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
+
+        <button type="submit">Anmelden</button>
+        <p class="message" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="footer">
+        Noch kein Konto? <a href="/register">Jetzt registrieren</a>
+      </div>
+    </main>
+  </body>
+</html>
