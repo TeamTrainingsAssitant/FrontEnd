@@ -5,7 +5,6 @@ import { GraphqlService } from './graphql.service';
 export interface Plan {
   id: number;
   name: string;
-  description: string | null;
   updatedAt: string;
   exerciseCount: number;
 }
@@ -36,7 +35,7 @@ export interface TrainingSet {
 // GraphQL liefert IDs als Text, die Oberfläche rechnet mit Zahlen
 type WithStringId<T> = Omit<T, 'id'> & { id: string };
 
-const PLAN_FIELDS = 'id name description updatedAt exerciseCount';
+const PLAN_FIELDS = 'id name updatedAt exerciseCount';
 const EXERCISE_FIELDS = 'id externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups position note sets reps weight trainingSets { weight reps }';
 const CATALOG_FIELDS = 'externalId name gifUrl primaryMuscleGroups secondaryMuscleGroups';
 
@@ -59,20 +58,20 @@ export class PlanService {
       .pipe(map((data) => data.plans.map(toPlan)));
   }
 
-  create(name: string, description: string): Observable<Plan> {
+  create(name: string): Observable<Plan> {
     return this.graphql
       .request<{ createPlan: WithStringId<Plan> }>(
         `mutation ($input: PlanInput!) { createPlan(input: $input) { ${PLAN_FIELDS} } }`,
-        { input: { name, description } }
+        { input: { name } }
       )
       .pipe(map((data) => toPlan(data.createPlan)));
   }
 
-  update(id: number, name: string, description: string): Observable<Plan> {
+  update(id: number, name: string): Observable<Plan> {
     return this.graphql
       .request<{ updatePlan: WithStringId<Plan> }>(
         `mutation ($id: ID!, $input: PlanInput!) { updatePlan(id: $id, input: $input) { ${PLAN_FIELDS} } }`,
-        { id: String(id), input: { name, description } }
+        { id: String(id), input: { name } }
       )
       .pipe(map((data) => toPlan(data.updatePlan)));
   }

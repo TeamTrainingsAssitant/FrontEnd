@@ -151,7 +151,7 @@ export class DashboardComponent {
   renamePlan(plan: Plan): void {
     const name = this.renameValue.trim();
     if (!name) return;
-    this.plansApi.update(plan.id, name, plan.description || '').subscribe({
+    this.plansApi.update(plan.id, name).subscribe({
       next: () => {
         this.planToRename = null;
         this.loadPlans();
@@ -409,7 +409,7 @@ export class DashboardComponent {
       this.error = 'Bitte gib einen Namen für den Trainingsplan ein.';
       return;
     }
-    this.plansApi.create(name, '').subscribe({
+    this.plansApi.create(name).subscribe({
       next: (plan) => {
         this.plans = [plan, ...this.plans];
         this.columnExercises[plan.id] = [];
