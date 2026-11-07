@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, User } from '../auth.service';
-import { EXERCISE_PAGE_SIZE, Exercise, Plan, PlanExercise, PlanService, TrainingSet } from '../plan.service';
+import { AuthService, User } from '../../core/auth.service';
+import { EXERCISE_PAGE_SIZE, Exercise, Plan, PlanExercise, PlanService, TrainingSet } from '../../core/plan.service';
 import { BodyHeatmapComponent } from '../body-heatmap/body-heatmap.component';
 
 // Welcher ExerciseDB-Muskel zu welcher Fläche der Körperfigur gehört

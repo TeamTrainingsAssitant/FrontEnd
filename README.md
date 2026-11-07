@@ -71,15 +71,22 @@ Für reine Oberflächenarbeit gibt es `cd angular && npm start`. Login und Cooki
 server.mjs              Webserver und Proxy
 public/                 MPA: Login und Registrierung
 angular/src/app/
-  auth/                 Anmeldeseite der SPA
-  body-heatmap/         Körperfigur mit Muskel-Heatmap
-  core/                 Route Guard
-  dashboard/            Pläne, Übungen, Dialoge
-  auth.service.ts       Sitzung
-  graphql.service.ts    GraphQL-Aufrufe
-  plan.service.ts       Pläne und Übungen
-  config.ts             API-Pfade
+  core/                 Globale Infrastruktur und Services
+    auth.guard.ts       Route Guard
+    auth.interceptor.ts Cookie-/Session-Weitergabe
+    auth.service.ts     Sitzung und Benutzerkonto
+    graphql.service.ts  GraphQL-Aufrufe
+    plan.service.ts     Pläne und Übungen
+    config.ts           API-Pfade
+  features/             Fachlich zusammengehörige SPA-Komponenten
+    auth/               Authentifizierungsbezogene UI-Dateien
+    dashboard/          Pläne, Übungen und Dialoge
+    body-heatmap/       Körperfigur mit Muskel-Heatmap
 ```
+
+Die Angular-Dateien sind nach fachlicher Verantwortung organisiert: globale
+Infrastruktur liegt unter `core/`, während UI-Funktionen unter `features/`
+gebündelt sind. Die MPA-Dateien unter `public/` bleiben davon getrennt.
 
 ## Deployment (Heroku)
 
