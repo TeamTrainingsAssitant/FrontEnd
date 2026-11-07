@@ -432,10 +432,7 @@ export class DashboardComponent {
   logout(): void {
     this.auth.logout().subscribe({
       next: () => window.location.assign('/login'),
-      error: () => {
-        this.auth.clearSession();
-        window.location.assign('/login');
-      }
+      error: () => window.location.assign('/login')
     });
   }
 
@@ -511,7 +508,6 @@ export class DashboardComponent {
     if (!this.deletePassword) return;
     this.auth.deleteAccount(this.deletePassword).subscribe({
       next: () => {
-        this.auth.clearSession();
         window.location.assign('/login');
       },
       error: (error: unknown) => this.error = this.apiMessage(error, 'Konto konnte nicht gelöscht werden.')

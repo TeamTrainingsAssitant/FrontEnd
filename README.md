@@ -79,7 +79,6 @@ angular/src/app/
     plan.service.ts     Pläne und Übungen
     config.ts           API-Pfade
   features/             Fachlich zusammengehörige SPA-Komponenten
-    auth/               Authentifizierungsbezogene UI-Dateien
     dashboard/          Pläne, Übungen und Dialoge
     body-heatmap/       Körperfigur mit Muskel-Heatmap
 ```

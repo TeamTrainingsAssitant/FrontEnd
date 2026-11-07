@@ -6,9 +6,6 @@
     "heroku-postbuild": "npm run build",
     "start": "node server.mjs"
   },
-  "dependencies": {
-    "serve": "^14.2.4"
-  },
   "engines": {
     "node": "24.x"
   }
